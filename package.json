@@ -1,0 +1,120 @@
+{
+  "name": "dgdlpc",
+  "displayName": "dgdlpc",
+  "description": "Language support for DGD LPC.",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "dgdlpc.showConfig",
+        "title": "Display DGD configuration file",
+        "category": "DGD"
+      },
+      {
+        "command": "dgdlpc.indent",
+        "title": "Indent Current File",
+        "category": "DGD"
+      },
+      {
+        "command": "dgdlpc.compile",
+        "title": "Compile Current File",
+        "category": "DGD"
+      },
+      {
+        "command": "dgdlpc.connect",
+        "title": "Connect to Server",
+        "category": "DGD"
+      },
+      {
+        "command": "dgdlpc.showDocument",
+        "title": "Show LPC Documentation",
+        "category": "DGD"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "dgdlpc.compile",
+        "key": "ctrl+shift+b",
+        "mac": "cmd+shift+b",
+        "when": "editorLangId == lpc"
+      },
+      {
+        "command": "dgdlpc.indent",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "editorLangId == lpc"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == lpc",
+          "command": "dgdlpc.compile",
+          "group": "1_modification"
+        },
+        {
+          "when": "editorLangId == lpc",
+          "command": "dgdlpc.indent",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "lpc",
+        "aliases": [
+          "LPC",
+          "lpc"
+        ],
+        "extensions": [
+          ".c",
+          ".h"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "lpc",
+        "scopeName": "source.lpc",
+        "path": "./syntaxes/lpc.tmLanguage.json"
+      }
+    ]
+  },
+  "activationEvents": [
+    "workspaceContains:**/*.c"
+  ],
+  "capabilities": {
+    "documentFormattingProvider": "true"
+  },
+  "main": "./dist/extension.js",
+  "dependencies": {
+    "jaro-winkler": "^0.2.8"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.27.1",
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.1",
+    "antlr4": "^4.13.2",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0"
+  },
+  "files": [
+    "kfun-docs/*"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "build": "babel src --out-dir dist --copy-files",
+    "lpc-parser": "node generate-lpc-parser.js",
+    "hover-docs": "node generate-hover-json.js",
+    "kfun-docs": "node generate-kfun-docs.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+  }
+}
