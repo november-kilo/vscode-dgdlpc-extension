@@ -1,36 +1,26 @@
-import * as vscode from 'vscode';
-import kfunsData from '../kfuns.json';
+import KfunsHoverHandler from './hover/hover-handler-kfuns';
 
 export default class LPCHoverProvider {
-	provideHover(document, position) {
-		const range = document.getWordRangeAtPosition(position);
-		if (!range) {
-			return;
-		}
+	constructor(hoverHandlers = [
+		new KfunsHoverHandler()
+	]) {
+		this.hoverHandlers = hoverHandlers;
+	}
 
-		const word = document.getText(range);
-		const kfun = kfunsData.kfuns[word];
-
-		if (kfun) {
-			const content = new vscode.MarkdownString();
-			content.appendMarkdown(`### ${word}\n\n`);
-			content.appendMarkdown(`${kfun.description}\n\n`);
-
-			if (kfun.params && kfun.params.length > 0) {
-				content.appendMarkdown('**Parameters:**\n\n');
-				kfun.params.forEach(param => {
-					const optional = param.optional ? ' (optional)' : '';
-					content.appendMarkdown(`- \`${param.label}\`${optional}: ${param.documentation}\n`);
-				});
+	provideHover(document, position, token) {
+		for (const handler of this.hoverHandlers) {
+			if (handler.canHandle(document, position)) {
+				return handler.createHover(document, position);
 			}
-
-			return new vscode.Hover(content, range);
 		}
-
 		return null;
 	}
 
 	dispose() {
-
+		for (const handler of this.hoverHandlers) {
+			if (typeof handler.dispose === 'function') {
+				handler.dispose();
+			}
+		}
 	}
 }

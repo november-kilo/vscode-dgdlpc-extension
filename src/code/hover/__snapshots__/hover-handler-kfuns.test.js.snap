@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KfunsHoverHandler hover content generation generates hover for function with all properties 1`] = `
+{
+  "contents": [
+    mockConstructor {
+      "appendCodeblock": [MockFunction],
+      "appendMarkdown": [MockFunction],
+      "isTrusted": true,
+      "supportHtml": true,
+      "supportThemeIcons": true,
+      "value": "### test_fun
+
+[test_fun](command:lpc.showKfunDoc?%5B%22test_fun%22%5D)
+
+Test function description
+
+**Parameters:**
+
+- \`param1\`: First parameter
+- \`param2\` (optional): Second parameter
+
+
+**See Also:**[related_fun](command:lpc.showKfunDoc?%5B%22related_fun%22%5D), [another_fun](command:lpc.showKfunDoc?%5B%22another_fun%22%5D)",
+    },
+  ],
+  "range": {
+    "end": {
+      "character": 8,
+      "line": 0,
+    },
+    "start": {
+      "character": 0,
+      "line": 0,
+    },
+  },
+}
+`;
+
+exports[`KfunsHoverHandler hover content generation generates hover for function without parameters 1`] = `
+{
+  "contents": [
+    mockConstructor {
+      "appendCodeblock": [MockFunction],
+      "appendMarkdown": [MockFunction],
+      "isTrusted": true,
+      "supportHtml": true,
+      "supportThemeIcons": true,
+      "value": "### no_params_fun
+
+[no_params_fun](command:lpc.showKfunDoc?%5B%22no_params_fun%22%5D)
+
+Function without parameters
+
+",
+    },
+  ],
+  "range": {
+    "end": {
+      "character": 8,
+      "line": 0,
+    },
+    "start": {
+      "character": 0,
+      "line": 0,
+    },
+  },
+}
+`;

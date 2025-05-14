@@ -64,6 +64,39 @@ describe('CodeFix', () => {
 		expect(indentation).toBe('');
 	});
 
+	describe('getLineIndentation', () => {
+		test('returns empty string for no indentation', () => {
+			document.lineAt.mockReturnValue({ text: 'no indentation' });
+			const indentation = codeFix.getLineIndentation();
+			expect(indentation).toBe('');
+		});
+
+		test('gets correct tab indentation', () => {
+			document.lineAt.mockReturnValue({ text: '\t\tsome code' });
+			const indentation = codeFix.getLineIndentation();
+			expect(indentation).toBe('\t\t');
+		});
+
+		test('gets correct mixed indentation', () => {
+			document.lineAt.mockReturnValue({ text: ' \t \tsome code' });
+			const indentation = codeFix.getLineIndentation();
+			expect(indentation).toBe(' \t \t');
+		});
+
+		test('uses correct line number from diagnostic', () => {
+			diagnostic.range.start.line = 42;
+			codeFix.getLineIndentation();
+			expect(document.lineAt).toHaveBeenCalledWith(42);
+		});
+
+		test('returns empty string for empty line', () => {
+			document.lineAt.mockReturnValue({ text: '' });
+			const indentation = codeFix.getLineIndentation();
+			expect(indentation).toBe('');
+		});
+	});
+
+
 	test('throws error when getTitle is not implemented', () => {
 		class UnimplementedFix extends CodeFix {}
 		const fix = new UnimplementedFix(document, diagnostic);

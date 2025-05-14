@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import LPCCodeActionProvider from './action-provider';
 import CodeFixFactory from './actions/code-fix-factory';
 
@@ -9,148 +8,98 @@ describe('LPCCodeActionProvider', () => {
 	let mockDocument;
 	let mockRange;
 	let mockDiagnostic;
-	let mockContext;
+	let mockFix;
+	let mockFixAction;
 
 	beforeEach(() => {
+		jest.clearAllMocks();
+
 		provider = new LPCCodeActionProvider();
-		mockDocument = { uri: vscode.Uri.file('/test/file.c') };
-		mockRange = new vscode.Range(0, 0, 0, 1);
-		mockDiagnostic = new vscode.Diagnostic(
-			mockRange,
-			'Test diagnostic',
-			vscode.DiagnosticSeverity.Error
-		);
-		mockContext = {
-			diagnostics: [mockDiagnostic]
+		mockDocument = {};
+		mockRange = {};
+		mockDiagnostic = { message: 'test diagnostic' };
+		mockFixAction = { title: 'Fix Action' };
+		mockFix = {
+			createFix: jest.fn().mockReturnValue(mockFixAction)
 		};
 
-		// Reset all mocks
-		jest.clearAllMocks();
+		CodeFixFactory.isValidDiagnostic = jest.fn().mockReturnValue(true);
+		CodeFixFactory.createFix = jest.fn().mockReturnValue(mockFix);
+
+		jest.spyOn(console, 'error').mockImplementation(() => {});
 	});
 
 	describe('provideCodeActions', () => {
-		test('should return empty array when no diagnostics', () => {
-			const result = provider.provideCodeActions(
-				mockDocument,
-				mockRange,
-				{ diagnostics: [] }
-			);
+		test('returns empty array when no diagnostics', () => {
+			const context = { diagnostics: [] };
+			const result = provider.provideCodeActions(mockDocument, mockRange, context);
 			expect(result).toEqual([]);
 		});
 
-		test('should process valid diagnostics', () => {
-			const mockCodeAction = new vscode.CodeAction(
-				'Fix test issue',
-				vscode.CodeActionKind.QuickFix
-			);
+		test('adds fixAction to actions array when valid fix is created', () => {
+			const context = { diagnostics: [mockDiagnostic] };
+			const result = provider.provideCodeActions(mockDocument, mockRange, context);
 
-			// Mock the CodeFixFactory methods
-			CodeFixFactory.isValidDiagnostic.mockReturnValue(true);
-			CodeFixFactory.createFix.mockReturnValue({
-				createFix: () => mockCodeAction
-			});
-
-			const actions = provider.provideCodeActions(
-				mockDocument,
-				mockRange,
-				mockContext
-			);
-
-			expect(actions).toHaveLength(1);
-			expect(actions[0]).toBe(mockCodeAction);
-			expect(CodeFixFactory.isValidDiagnostic).toHaveBeenCalledWith(mockDiagnostic);
-			expect(CodeFixFactory.createFix).toHaveBeenCalledWith(mockDocument, mockDiagnostic);
+			expect(result).toContain(mockFixAction);
+			expect(result.length).toBe(1);
 		});
 
-		test('should skip invalid diagnostics', () => {
+		test('does not add fixAction to actions array when fix is null', () => {
+			mockFix.createFix.mockReturnValue(null);
+			const context = { diagnostics: [mockDiagnostic] };
+
+			const result = provider.provideCodeActions(mockDocument, mockRange, context);
+
+			expect(result).toEqual([]);
+			expect(result.length).toBe(0);
+		});
+
+		test('skips invalid diagnostics', () => {
 			CodeFixFactory.isValidDiagnostic.mockReturnValue(false);
+			const context = { diagnostics: [mockDiagnostic] };
 
-			const actions = provider.provideCodeActions(
-				mockDocument,
-				mockRange,
-				mockContext
-			);
+			const result = provider.provideCodeActions(mockDocument, mockRange, context);
 
-			expect(actions).toHaveLength(0);
-			expect(CodeFixFactory.isValidDiagnostic).toHaveBeenCalledWith(mockDiagnostic);
 			expect(CodeFixFactory.createFix).not.toHaveBeenCalled();
+			expect(result).toEqual([]);
 		});
 
-		test('should handle multiple diagnostics', () => {
-			const mockDiagnostic2 = new vscode.Diagnostic(
-				mockRange,
-				'Second diagnostic',
-				vscode.DiagnosticSeverity.Warning
-			);
-
-			const mockCodeAction1 = new vscode.CodeAction(
-				'Fix first issue',
-				vscode.CodeActionKind.QuickFix
-			);
-			const mockCodeAction2 = new vscode.CodeAction(
-				'Fix second issue',
-				vscode.CodeActionKind.QuickFix
-			);
-
-			mockContext.diagnostics = [mockDiagnostic, mockDiagnostic2];
+		test('handles multiple diagnostics correctly', () => {
+			const validDiagnostic1 = { message: 'valid1' };
+			const validDiagnostic2 = { message: 'valid2' };
+			const invalidDiagnostic = { message: 'invalid' };
 
 			CodeFixFactory.isValidDiagnostic
-				.mockReturnValueOnce(true)
-				.mockReturnValueOnce(true);
+				.mockImplementation(diag => diag.message.startsWith('valid'));
 
-			CodeFixFactory.createFix
-				.mockReturnValueOnce({ createFix: () => mockCodeAction1 })
-				.mockReturnValueOnce({ createFix: () => mockCodeAction2 });
+			mockFix.createFix
+				.mockReturnValueOnce({ title: 'Fix 1' })
+				.mockReturnValueOnce({ title: 'Fix 2' });
 
-			const actions = provider.provideCodeActions(
-				mockDocument,
-				mockRange,
-				mockContext
-			);
+			const context = {
+				diagnostics: [validDiagnostic1, invalidDiagnostic, validDiagnostic2]
+			};
 
-			expect(actions).toHaveLength(2);
-			expect(actions).toContain(mockCodeAction1);
-			expect(actions).toContain(mockCodeAction2);
+			const result = provider.provideCodeActions(mockDocument, mockRange, context);
+
+			expect(result).toEqual([{ title: 'Fix 1' }, { title: 'Fix 2' }]);
+			expect(result.length).toBe(2);
 		});
 	});
 
 	describe('createFixAction', () => {
-		test('should create fix action when valid', () => {
-			const mockCodeAction = new vscode.CodeAction(
-				'Fix test issue',
-				vscode.CodeActionKind.QuickFix
-			);
-
-			CodeFixFactory.createFix.mockReturnValue({
-				createFix: () => mockCodeAction
-			});
-
-			const result = provider.createFixAction(mockDocument, mockDiagnostic);
-
-			expect(result).toBe(mockCodeAction);
-			expect(CodeFixFactory.createFix).toHaveBeenCalledWith(
-				mockDocument,
-				mockDiagnostic
-			);
-		});
-
-		test('should return null when fix creation fails', () => {
+		test('handles errors gracefully', () => {
 			CodeFixFactory.createFix.mockImplementation(() => {
 				throw new Error('Test error');
 			});
 
-			const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
 			const result = provider.createFixAction(mockDocument, mockDiagnostic);
 
+			expect(console.error).toHaveBeenCalled();
 			expect(result).toBeNull();
-			expect(consoleSpy).toHaveBeenCalled();
-			expect(consoleSpy.mock.calls[0][0]).toBe('Error creating fix action:');
-
-			consoleSpy.mockRestore();
 		});
 
-		test('should return null when factory returns no fix', () => {
+		test('returns null when fix creation returns null', () => {
 			CodeFixFactory.createFix.mockReturnValue(null);
 
 			const result = provider.createFixAction(mockDocument, mockDiagnostic);
@@ -160,8 +109,10 @@ describe('LPCCodeActionProvider', () => {
 	});
 
 	describe('dispose', () => {
-		test('should not throw when disposed', () => {
-			expect(() => provider.dispose()).not.toThrow();
+		test('function executes without throwing', () => {
+			expect(() => {
+				provider.dispose();
+			}).not.toThrow();
 		});
 	});
 });

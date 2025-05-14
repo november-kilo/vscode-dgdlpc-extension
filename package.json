@@ -95,13 +95,12 @@
   },
   "main": "./dist/extension.js",
   "dependencies": {
-    "jaro-winkler": "^0.2.8"
+    "antlr4": "^4.13.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.27.1",
     "@babel/core": "^7.27.1",
     "@babel/preset-env": "^7.27.1",
-    "antlr4": "^4.13.2",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0"
   },

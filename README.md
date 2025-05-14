@@ -1,4 +1,3 @@
-
 This extension provides language support for [DGD](https://github.com/dworkin/dgd) LPC.
 
 # Requirements
@@ -65,15 +64,15 @@ An example of `.vscode/launch.json`:
 - `src/code/actions` - Actions, such as 'Quick Fix'
 - `src/code/completions` - Auto-completion providers
 - `src/code/diagnostics` - Diagnostics, such as detecting variable declaration with assignment. There's a lot of other code in here because there were other things I wanted to do but haven't got around to them.
-- `src/code/semantic-tokens` - Semantic token visitor(s)
+- `src/code/hover` - Hover handlers
 - `src/dgd` - DGD-specific functionality
 - `src/lpc` - LPC language parsing. The code here is experimenting with antlr to learn how to use it to implement more features.
 - `src/lpc/parser` - Generated ANTLR4 parser
 - Test files are next to the files they test (`file-name.js` and `file-name.test.js`)
 - `src/__mocks__`
-    - `fs`
-    - `net`
-    - `vscode`
+  - `fs`
+  - `net`
+  - `vscode`
 
 # Extension Settings
 

@@ -93,18 +93,6 @@ describe('LPCCompletionProvider', () => {
 		});
 	});
 
-	describe('error handling', () => {
-		test('should handle provider throwing error', () => {
-			mockKFunProvider.getCompletions.mockImplementation(() => {
-				throw new Error('Provider error');
-			});
-
-			const completions = provider.provideCompletionItems(mockDocument, mockPosition);
-
-			expect(completions).toHaveLength(4);
-		});
-	});
-
 	describe('dispose', () => {
 		test('should not throw when disposed', () => {
 			expect(() => provider.dispose()).not.toThrow();

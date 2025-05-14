@@ -96,6 +96,7 @@ function setupLanguageProviders(context) {
 		)
 	];
 
+
 	const documentChangeListener = vscode.workspace.onDidChangeTextDocument((event) => {
 		lpcDiagnosticProvider.updateDiagnostics(event.document);
 	});

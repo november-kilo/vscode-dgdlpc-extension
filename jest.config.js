@@ -1,7 +1,11 @@
 module.exports = {
+	injectGlobals: true,
 	transform: {
 		'^.+\\.js$': 'babel-jest'
 	},
+	"transformIgnorePatterns": [
+		"/node_modules/(?!antlr4/.*)"
+	],
 	testEnvironment: 'node',
 	moduleDirectories: ['node_modules', '__mocks__'],
 	testPathIgnorePatterns: [
@@ -21,3 +25,4 @@ module.exports = {
 	coverageDirectory: 'coverage',
 	coverageReporters: ['text', 'html']
 };
+

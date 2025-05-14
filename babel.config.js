@@ -7,6 +7,8 @@ module.exports = {
     }]
   ],
   ignore: [
-    'generate-hover-json.js'
+    'generate-hover-json.js',
+    'generate-kfun-json.js',
+    'generate-lpc-parser.js'
   ]
 };

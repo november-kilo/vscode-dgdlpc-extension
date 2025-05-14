@@ -51,4 +51,44 @@ describe('LPCDeclarationParser', () => {
 			});
 		});
 	});
+
+	describe('shouldNotCreateDiagnostic', () => {
+		let varName;
+		let varType;
+
+		beforeEach(() => {
+			varName = 'x';
+			varType = 'int';
+		})
+
+		test('should return true for exact varType and varName match with no extra whitespace', () => {
+			const fullMatch = 'intx = 42;';
+
+			expect(LPCDeclarationParser.shouldNotCreateDiagnostic(fullMatch, varType, varName)).toBe(true);
+		});
+
+		test('should return false if varName has whitespace', () => {
+			const fullMatch = 'int x = 42;';
+
+			expect(LPCDeclarationParser.shouldNotCreateDiagnostic(fullMatch, varType, varName)).toBe(false);
+		});
+
+		test('should return false if fullMatch does not start with concatenated varType and varName', () => {
+			const fullMatch = 'private int x = 42;';
+
+			expect(LPCDeclarationParser.shouldNotCreateDiagnostic(fullMatch, varType, varName)).toBe(false);
+		});
+
+		test('should return true for exact varType and varName with extra spacing in fullMatch', () => {
+			const fullMatch = '   intx=42   ';
+
+			expect(LPCDeclarationParser.shouldNotCreateDiagnostic(fullMatch, varType, varName)).toBe(true);
+		});
+
+		test('should return false if varType and varName concatenation has whitespace in between', () => {
+			const fullMatch = 'int x=42;';
+
+			expect(LPCDeclarationParser.shouldNotCreateDiagnostic(fullMatch, varType, varName)).toBe(false);
+		});
+	});
 });

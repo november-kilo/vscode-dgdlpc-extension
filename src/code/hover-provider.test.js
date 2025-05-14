@@ -1,98 +1,55 @@
-const vscode = require('vscode');
-import LPCHoverProvider from './hover-provider';
-
-jest.mock('../kfuns.json', () => ({
-	kfuns: {
-		'test_fun': {
-			description: 'Test function description',
-			params: [
-				{
-					label: 'param1',
-					documentation: 'First parameter',
-					optional: false
-				},
-				{
-					label: 'param2',
-					documentation: 'Second parameter',
-					optional: true
-				}
-			]
-		},
-		'no_params_fun': {
-			description: 'Function without parameters'
-		}
-	}
-}));
+import LPCHoverProvider from "./hover-provider";
 
 describe('LPCHoverProvider', () => {
-	let provider;
-	let mockDocument;
-	let mockPosition;
-	let mockRange;
-
-	beforeEach(() => {
-		provider = new LPCHoverProvider();
-		mockRange = new vscode.Range(0, 0, 0, 8);
-		mockPosition = new vscode.Position(0, 5);
-
-		mockDocument = {
-			getWordRangeAtPosition: jest.fn().mockReturnValue(mockRange),
-			getText: jest.fn()
+	test('should return null when no handler can handle the hover', () => {
+		const mockHandler = {
+			canHandle: jest.fn().mockReturnValue(false),
+			createHover: jest.fn()
 		};
-	});
 
-	test('should return undefined when no word range is found', () => {
-		mockDocument.getWordRangeAtPosition.mockReturnValue(null);
-
-		const result = provider.provideHover(mockDocument, mockPosition);
-
-		expect(result).toBeUndefined();
-		expect(mockDocument.getWordRangeAtPosition).toHaveBeenCalledWith(mockPosition);
-		expect(mockDocument.getText).not.toHaveBeenCalled();
-	});
-
-	test('should return null when word is not a known kfun', () => {
-		mockDocument.getText.mockReturnValue('unknown_fun');
-
-		const result = provider.provideHover(mockDocument, mockPosition);
+		const provider = new LPCHoverProvider([mockHandler]);
+		const result = provider.provideHover({}, {});
 
 		expect(result).toBeNull();
-		expect(mockDocument.getText).toHaveBeenCalledWith(mockRange);
+		expect(mockHandler.canHandle).toHaveBeenCalledTimes(1);
+		expect(mockHandler.createHover).not.toHaveBeenCalled();
 	});
 
-	test('should provide hover for kfun with parameters', () => {
-		mockDocument.getText.mockReturnValue('test_fun');
+	test('should return hover when handler can handle it', () => {
+		const expectedHover = { content: 'test hover' };
+		const mockHandler = {
+			canHandle: jest.fn().mockReturnValue(true),
+			createHover: jest.fn().mockReturnValue(expectedHover)
+		};
 
-		const result = provider.provideHover(mockDocument, mockPosition);
+		const provider = new LPCHoverProvider([mockHandler]);
+		const result = provider.provideHover({}, {});
 
-		expect(result).toBeTruthy();
-		expect(result.range).toBe(mockRange);
-
-		const markdownContent = result.contents[0];
-		expect(markdownContent.value).toContain('### test_fun');
-		expect(markdownContent.value).toContain('Test function description');
-		expect(markdownContent.value).toContain('**Parameters:**');
-		expect(markdownContent.value).toContain('`param1`');
-		expect(markdownContent.value).toContain('First parameter');
-		expect(markdownContent.value).toContain('`param2` (optional)');
-		expect(markdownContent.value).toContain('Second parameter');
+		expect(result).toBe(expectedHover);
+		expect(mockHandler.canHandle).toHaveBeenCalledTimes(1);
+		expect(mockHandler.createHover).toHaveBeenCalledTimes(1);
 	});
 
-	test('should provide hover for kfun without parameters', () => {
-		mockDocument.getText.mockReturnValue('no_params_fun');
+	test('dispose should call dispose on all handlers that have it', () => {
+		const mockHandler1 = {
+			canHandle: jest.fn(),
+			createHover: jest.fn(),
+			dispose: jest.fn()
+		};
+		const mockHandler2 = {
+			canHandle: jest.fn(),
+			createHover: jest.fn(),
+			dispose: jest.fn()
+		};
+		const mockHandler3 = {
+			canHandle: jest.fn(),
+			createHover: jest.fn()
+		};
 
-		const result = provider.provideHover(mockDocument, mockPosition);
+		const provider = new LPCHoverProvider([mockHandler1, mockHandler2, mockHandler3]);
+		provider.dispose();
 
-		expect(result).toBeTruthy();
-		expect(result.range).toBe(mockRange);
-
-		const markdownContent = result.contents[0];
-		expect(markdownContent.value).toContain('### no_params_fun');
-		expect(markdownContent.value).toContain('Function without parameters');
-		expect(markdownContent.value).not.toContain('**Parameters:**');
-	});
-
-	test('dispose should not throw', () => {
-		expect(() => provider.dispose()).not.toThrow();
+		expect(mockHandler1.dispose).toHaveBeenCalledTimes(1);
+		expect(mockHandler2.dispose).toHaveBeenCalledTimes(1);
 	});
 });

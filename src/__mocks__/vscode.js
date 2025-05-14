@@ -15,8 +15,8 @@ const DiagnosticMock = jest.fn().mockImplementation((range, message, severity) =
 Object.setPrototypeOf(DiagnosticClass.prototype, DiagnosticMock.prototype);
 
 const HoverMock = jest.fn().mockImplementation((contents, range) => ({
-	contents: Array.isArray(contents) ? contents : [contents],
-	range
+	contents: contents ? (Array.isArray(contents) ? contents : [contents]) : [],
+	range: range || null
 }));
 
 class WorkspaceEditMock {
@@ -96,17 +96,18 @@ module.exports = {
 	},
 	MarkdownString: jest.fn().mockImplementation(function(value = '') {
 		this.value = value;
+		this.appendMarkdown = jest.fn();
 		this.isTrusted = false;
 		this.supportThemeIcons = false;
 		this.supportHtml = false;
-		this.appendMarkdown = function(text) {
+		this.appendMarkdown = jest.fn(text => {
 			this.value += text;
 			return this;
-		};
-		this.appendCodeblock = function(code, language) {
+		});
+		this.appendCodeblock = jest.fn((code, language) => {
 			this.value += `\`\`\`${language}\n${code}\n\`\`\``;
 			return this;
-		};
+		});
 	}),
 	SnippetString: jest.fn().mockImplementation(function(value = '') {
 		this.value = value;
@@ -140,7 +141,11 @@ module.exports = {
 		}],
 		onDidChangeTextDocument: jest.fn().mockImplementation((callback) => ({
 			dispose: jest.fn()
-		}))
+		})),
+		onDidCloseTextDocument: jest.fn().mockImplementation((callback) => ({
+			dispose: jest.fn()
+		})),
+		textDocuments: []
 	},
 	WorkspaceEdit: jest.fn().mockImplementation(() => new WorkspaceEditMock()),
 	Uri: {

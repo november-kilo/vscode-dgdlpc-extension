@@ -33,8 +33,6 @@ export default class CodeFix {
 	getLineIndentation() {
 		const lineNumber = this.diagnostic.range.start.line;
 		const line = this.document.lineAt(lineNumber).text;
-		const match = line.match(/^\s*/);
-		return match ? match[0] : '';
-
+		return line.match(/^\s*/)[0];
 	}
 }

@@ -3,7 +3,7 @@ export default class LPCDeclarationParser {
 
 	static shouldNotCreateDiagnostic(fullMatch, varType, varName) {
 		const str = `${varType}${varName}`;
-		const hasNoWhitespace = (str) => !/\s/.test(str);
+		const hasNoWhitespace = !/\s/.test(str);
 		return hasNoWhitespace && fullMatch.trim().startsWith(str);
 	}
 
