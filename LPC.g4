@@ -240,7 +240,7 @@ literal
 stringExpression
     : STRING_LITERAL
     | '(' stringExpression ')'
-    | stringExpression '+' stringExpression
+    | stringExpression '+' STRING_LITERAL
     ;
 
 expressionList

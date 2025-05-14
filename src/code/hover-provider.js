@@ -7,7 +7,7 @@ export default class LPCHoverProvider {
 		this.hoverHandlers = hoverHandlers;
 	}
 
-	provideHover(document, position, token) {
+	provideHover(document, position) {
 		for (const handler of this.hoverHandlers) {
 			if (handler.canHandle(document, position)) {
 				return handler.createHover(document, position);

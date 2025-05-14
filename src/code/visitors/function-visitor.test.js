@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import FunctionDeclarationVisitor from './visitor';
-import FunctionCompletionParameters from './parameters';
+import FunctionDeclarationVisitor from './function-visitor';
+import FunctionCompletionParameters from '../completions/function-completion/parameters';
 
-jest.mock('./parameters');
+jest.mock('../completions/function-completion/parameters');
 
 describe('FunctionDeclarationVisitor', () => {
 	let visitor;

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import FunctionCompletionParameters from './parameters';
+import FunctionCompletionParameters from '../completions/function-completion/parameters';
 
 export default class FunctionDeclarationVisitor {
 	visit(ctx, functions, documentUri) {

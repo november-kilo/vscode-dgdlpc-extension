@@ -197,8 +197,8 @@ const serializedATN = [4,1,94,596,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 557,540,1,0,0,0,557,541,1,0,0,0,557,542,1,0,0,0,557,543,1,0,0,0,557,550,
 1,0,0,0,558,81,1,0,0,0,559,560,6,41,-1,0,560,566,5,91,0,0,561,562,5,2,0,
 0,562,563,3,82,41,0,563,564,5,3,0,0,564,566,1,0,0,0,565,559,1,0,0,0,565,
-561,1,0,0,0,566,572,1,0,0,0,567,568,10,1,0,0,568,569,5,4,0,0,569,571,3,82,
-41,2,570,567,1,0,0,0,571,574,1,0,0,0,572,570,1,0,0,0,572,573,1,0,0,0,573,
+561,1,0,0,0,566,572,1,0,0,0,567,568,10,1,0,0,568,569,5,4,0,0,569,571,5,91,
+0,0,570,567,1,0,0,0,571,574,1,0,0,0,572,570,1,0,0,0,572,573,1,0,0,0,573,
 83,1,0,0,0,574,572,1,0,0,0,575,580,3,76,38,0,576,577,5,25,0,0,577,579,3,
 76,38,0,578,576,1,0,0,0,579,582,1,0,0,0,580,578,1,0,0,0,580,581,1,0,0,0,
 581,85,1,0,0,0,582,580,1,0,0,0,583,588,3,88,44,0,584,585,5,25,0,0,585,587,
@@ -2804,7 +2804,7 @@ export default class LPCParser extends antlr4.Parser {
 	                this.state = 568;
 	                this.match(LPCParser.T__3);
 	                this.state = 569;
-	                this.stringExpression(2); 
+	                this.match(LPCParser.STRING_LITERAL); 
 	            }
 	            this.state = 574;
 	            this._errHandler.sync(this);
@@ -6253,15 +6253,8 @@ class StringExpressionContext extends antlr4.ParserRuleContext {
 	    return this.getToken(LPCParser.STRING_LITERAL, 0);
 	};
 
-	stringExpression = function(i) {
-	    if(i===undefined) {
-	        i = null;
-	    }
-	    if(i===null) {
-	        return this.getTypedRuleContexts(StringExpressionContext);
-	    } else {
-	        return this.getTypedRuleContext(StringExpressionContext,i);
-	    }
+	stringExpression() {
+	    return this.getTypedRuleContext(StringExpressionContext,0);
 	};
 
 	enterRule(listener) {

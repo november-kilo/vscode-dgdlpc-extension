@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import LPCParserFactory from '../../lpc-parser-factory';
 import FunctionCompletionItemsBuilder from './items-builder';
-import FunctionDeclarationVisitor from './visitor';
+import FunctionDeclarationVisitor from '../../visitors/function-visitor';
 
 export default class FunctionCompletionProvider {
 	constructor() {

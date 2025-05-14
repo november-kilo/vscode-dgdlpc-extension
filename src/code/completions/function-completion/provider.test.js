@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import FunctionCompletionProvider from './provider';
 import LPCParserFactory from '../../lpc-parser-factory';
 import FunctionCompletionItemsBuilder from './items-builder';
-import FunctionDeclarationVisitor from './visitor';
+import FunctionDeclarationVisitor from '../../visitors/function-visitor';
 
 // Mock dependencies
 jest.mock('../../lpc-parser-factory', () => ({
@@ -11,7 +11,7 @@ jest.mock('../../lpc-parser-factory', () => ({
 	})
 }));
 
-jest.mock('./visitor');
+jest.mock('../../visitors/function-visitor');
 jest.mock('./items-builder');
 
 describe('FunctionCompletionProvider', () => {
