@@ -14,6 +14,22 @@ const DiagnosticMock = jest.fn().mockImplementation((range, message, severity) =
 // Make the prototype chain work correctly for instanceof checks
 Object.setPrototypeOf(DiagnosticClass.prototype, DiagnosticMock.prototype);
 
+class LocationClass {
+	constructor(uri, position) {
+		this.uri = uri;
+		this.range = {
+			start: position,
+			end: position
+		};
+	}
+}
+
+const LocationMock = jest.fn().mockImplementation((uri, position) => {
+	return new LocationClass(uri, position);
+});
+
+Object.setPrototypeOf(LocationClass.prototype, LocationMock.prototype);
+
 const HoverMock = jest.fn().mockImplementation((contents, range) => ({
 	contents: contents ? (Array.isArray(contents) ? contents : [contents]) : [],
 	range: range || null
@@ -181,5 +197,6 @@ module.exports = {
 			dispose: jest.fn()
 		})),
 		registerDocumentSemanticTokensProvider: jest.fn().mockReturnValue({ dispose: jest.fn() })
-	}
+	},
+	Location: LocationMock
 };

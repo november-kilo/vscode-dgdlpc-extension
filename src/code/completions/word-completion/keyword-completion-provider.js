@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
+import WordCompletionProvider from './word-completion-provider';
 
-export default class KeywordCompletionProvider {
+export default class KeywordCompletionProvider extends WordCompletionProvider{
 	static KEYWORDS = [
 		['if', 'Conditional statement'],
 		['else', 'Alternative conditional branch'],
@@ -22,12 +23,7 @@ export default class KeywordCompletionProvider {
 		['varargs', 'Variable arguments']
 	];
 
-	getCompletions() {
-		return KeywordCompletionProvider.KEYWORDS.map(([keyword, desc]) => {
-			const completionItem = new vscode.CompletionItem(keyword);
-			completionItem.kind = vscode.CompletionItemKind.Keyword;
-			completionItem.documentation = new vscode.MarkdownString(`**${keyword}** - ${desc}`);
-			return completionItem;
-		});
+	constructor() {
+		super(KeywordCompletionProvider.KEYWORDS, vscode.CompletionItemKind.Keyword);
 	}
 }

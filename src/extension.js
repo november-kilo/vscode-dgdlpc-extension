@@ -7,6 +7,7 @@ import LPCDiagnosticProvider from './code/diagnostic-provider';
 import LPCHoverProvider from './code/hover-provider';
 import DGDConfigManager from './dgd/config-manager';
 import DGDIntegration from './dgd/integration';
+import FunctionCompletionProvider from './code/completions/function-completion/provider';
 
 function registerDGDCommands(context, dgd) {
 	context.subscriptions.push(
@@ -71,6 +72,7 @@ function setupLanguageProviders(context) {
 
 	const lpcCodeActionProvider = new LPCCodeActionProvider();
 	const lpcCompletionProvider = new LPCCompletionProvider();
+	const lpcFunctionCompletionProvider = new FunctionCompletionProvider();
 	const lpcHoverProvider = new LPCHoverProvider();
 
 	const lpcLanguageIdentifier = {
@@ -93,9 +95,12 @@ function setupLanguageProviders(context) {
 		vscode.languages.registerHoverProvider(
 			lpcLanguageIdentifier,
 			lpcHoverProvider
+		),
+		vscode.languages.registerCompletionItemProvider(
+			lpcLanguageIdentifier,
+			lpcFunctionCompletionProvider
 		)
 	];
-
 
 	const documentChangeListener = vscode.workspace.onDidChangeTextDocument((event) => {
 		lpcDiagnosticProvider.updateDiagnostics(event.document);

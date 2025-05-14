@@ -25,11 +25,11 @@ describe('TypeCompletionProvider', () => {
 		});
 	});
 
-	describe('getCompletions', () => {
+	describe('getCompletionItems', () => {
 		let completions;
 
 		beforeEach(() => {
-			completions = provider.getCompletions();
+			completions = provider.getCompletionItems();
 		});
 
 		test('returns completion items for all types', () => {

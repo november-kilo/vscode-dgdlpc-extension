@@ -52,7 +52,7 @@ declaration
     ;
 
 functionDeclaration
-    : modifiers? typeSpecifier functionDeclarator block
+    : modifiers? typeSpecifier functionDeclarator (block | ';')
     ;
 
 functionDeclarator

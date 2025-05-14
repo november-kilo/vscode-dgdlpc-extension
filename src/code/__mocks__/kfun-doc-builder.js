@@ -9,7 +9,7 @@ const mockCompletions = [
 ];
 
 const KFunDocBuilder = jest.fn().mockImplementation(() => ({
-	getCompletions: jest.fn().mockReturnValue(mockCompletions),
+	getCompletionItems: jest.fn().mockReturnValue(mockCompletions),
 
 }));
 

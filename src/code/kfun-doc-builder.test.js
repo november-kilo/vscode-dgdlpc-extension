@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import KFunDocBuilder from './kfun-doc-builder';
 import MarkdownUtil from './markdown-util';
 
-jest.mock('./markdown-util');
-
 describe('KFunDocBuilder', () => {
+	let showDocumentSpy;
+	let boldSpy;
 	let builder;
 	const mockKfunsData = {
 		kfuns: {
@@ -26,14 +26,21 @@ describe('KFunDocBuilder', () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		showDocumentSpy = jest.spyOn(MarkdownUtil, 'showDocument');
+		showDocumentSpy.mockReturnValue('[view documentation](link)');
+		boldSpy = jest.spyOn(MarkdownUtil, 'bold');
+		boldSpy.mockReturnValue('**bold**');
 		builder = new KFunDocBuilder();
 		builder.getKfunsData = jest.fn().mockReturnValue(mockKfunsData);
 	});
 
-	describe('getCompletions', () => {
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
+	describe('getCompletionItems', () => {
 		test('returns array of completion items', () => {
-			const completions = builder.getCompletions();
+			const completions = builder.getCompletionItems();
 			expect(completions).toHaveLength(1);
 			expect(completions[0].label).toBe('test_function');
 			expect(completions[0].kind).toBe(vscode.CompletionItemKind.Function);
@@ -51,7 +58,7 @@ describe('KFunDocBuilder', () => {
 
 			expect(doc.appendMarkdown).toHaveBeenCalledWith(expect.stringContaining('### test_function'));
 			expect(doc.appendMarkdown).toHaveBeenCalledWith(expect.stringContaining('Test description'));
-			expect(doc.appendCodeblock).toHaveBeenCalledWith('int test_function(int arg)', 'c');
+			expect(doc.appendCodeblock).toHaveBeenCalledWith('int test_function(int arg)', 'lpc');
 		});
 	});
 
@@ -77,7 +84,6 @@ describe('KFunDocBuilder', () => {
 
 		beforeEach(() => {
 			doc = builder.initializeMarkdownString();
-			MarkdownUtil.showDocument.mockReturnValue('[view documentation](link)');
 		});
 
 		test('appends all available information', () => {
@@ -90,9 +96,9 @@ describe('KFunDocBuilder', () => {
 			builder.appendBasicInfo(doc, 'test_function', kfun);
 
 			expect(doc.appendMarkdown).toHaveBeenCalledWith('### test_function\n\n');
-			expect(MarkdownUtil.showDocument).toHaveBeenCalledWith('test_function', 'view documentation');
+			expect(showDocumentSpy).toHaveBeenCalledWith('test_function', 'view documentation');
 			expect(doc.appendMarkdown).toHaveBeenCalledWith('Test description\n\n');
-			expect(doc.appendCodeblock).toHaveBeenCalledWith('void test()', 'c');
+			expect(doc.appendCodeblock).toHaveBeenCalledWith('void test()', 'lpc');
 			expect(doc.appendMarkdown).toHaveBeenCalledWith('\n');
 			expect(doc.appendMarkdown).toHaveBeenCalledWith('\nDetailed docs\n\n');
 		});
@@ -105,7 +111,7 @@ describe('KFunDocBuilder', () => {
 			builder.appendBasicInfo(doc, 'test_function', kfun);
 
 			expect(doc.appendMarkdown).toHaveBeenCalledWith('### test_function\n\n');
-			expect(MarkdownUtil.showDocument).toHaveBeenCalledWith('test_function', 'view documentation');
+			expect(showDocumentSpy).toHaveBeenCalledWith('test_function', 'view documentation');
 			expect(doc.appendMarkdown).not.toHaveBeenCalledWith(expect.stringContaining('undefined'));
 			expect(doc.appendCodeblock).not.toHaveBeenCalled();
 		});
@@ -117,7 +123,7 @@ describe('KFunDocBuilder', () => {
 
 			builder.appendBasicInfo(doc, 'test_function', kfun);
 
-			expect(doc.appendCodeblock).toHaveBeenCalledWith('void test()', 'c');
+			expect(doc.appendCodeblock).toHaveBeenCalledWith('void test()', 'lpc');
 		});
 
 		test('maintains correct order of sections', () => {
@@ -140,19 +146,21 @@ describe('KFunDocBuilder', () => {
 	});
 
 	describe('appendSeeAlso', () => {
+
 		test('appends see also section when references exist', () => {
 			const doc = builder.initializeMarkdownString();
+
 			builder.appendSeeAlso(doc, ['other_function']);
 
-			expect(MarkdownUtil.bold).toHaveBeenCalledWith('See Also', true);
-			expect(MarkdownUtil.showDocument).toHaveBeenCalledWith('other_function');
+			expect(boldSpy).toHaveBeenCalledWith('See Also', true);
+			expect(showDocumentSpy).toHaveBeenCalledWith('other_function');
 		});
 
 		test('skips see also section when no references', () => {
 			const doc = builder.initializeMarkdownString();
 			builder.appendSeeAlso(doc, []);
 
-			expect(MarkdownUtil.bold).not.toHaveBeenCalled();
+			expect(boldSpy).not.toHaveBeenCalled();
 		});
 	});
 

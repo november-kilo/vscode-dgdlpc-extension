@@ -9,12 +9,12 @@ describe('KeywordCompletionProvider', () => {
 	});
 
 	test('provides all LPC keywords as completion items', () => {
-		const completions = provider.getCompletions();
+		const completions = provider.getCompletionItems();
 		expect(completions).toHaveLength(KeywordCompletionProvider.KEYWORDS.length);
 	});
 
 	test('formats completion items correctly', () => {
-		const completions = provider.getCompletions();
+		const completions = provider.getCompletionItems();
 		const [firstKeyword, firstDesc] = KeywordCompletionProvider.KEYWORDS[0];
 		const firstCompletion = completions[0];
 
@@ -30,7 +30,7 @@ describe('KeywordCompletionProvider', () => {
 	});
 
 	test('includes documentation for all completion items', () => {
-		const completions = provider.getCompletions();
+		const completions = provider.getCompletionItems();
 
 		completions.forEach((completion, index) => {
 			const [keyword, desc] = KeywordCompletionProvider.KEYWORDS[index];

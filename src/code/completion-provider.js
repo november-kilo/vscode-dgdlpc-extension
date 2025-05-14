@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import KFunCompletionProvider from './completions/kfun-completion-provider';
-import KeywordCompletionProvider from './completions/keyword-completion-provider';
-import TypeCompletionProvider from './completions/type-completion-provider';
+import KFunCompletionProvider from './completions/kfun-completion/provider';
+import KeywordCompletionProvider from './completions/word-completion/keyword-completion-provider';
+import TypeCompletionProvider from './completions/word-completion/type-completion-provider';
 
 export default class LPCCompletionProvider {
 	constructor() {
@@ -18,7 +18,7 @@ export default class LPCCompletionProvider {
 		];
 
 		return providers
-			.map(provider => provider.getCompletions())
+			.map(provider => provider.getCompletionItems())
 			.filter(Array.isArray)
 			.flat();
 	}

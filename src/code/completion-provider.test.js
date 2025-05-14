@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import LPCCompletionProvider from './completion-provider';
-import KFunCompletionProvider from './completions/kfun-completion-provider';
-import KeywordCompletionProvider from './completions/keyword-completion-provider';
-import TypeCompletionProvider from './completions/type-completion-provider';
+import KFunCompletionProvider from './completions/kfun-completion/provider';
+import KeywordCompletionProvider from './completions/word-completion/keyword-completion-provider';
+import TypeCompletionProvider from './completions/word-completion/type-completion-provider';
 
-jest.mock('./completions/kfun-completion-provider');
-jest.mock('./completions/keyword-completion-provider');
-jest.mock('./completions/type-completion-provider');
+jest.mock('./completions/kfun-completion/provider');
+jest.mock('./completions/word-completion/keyword-completion-provider');
+jest.mock('./completions/word-completion/type-completion-provider');
 jest.mock('../kfuns.json', () => ({}), { virtual: true });
 
 describe('LPCCompletionProvider', () => {
@@ -24,21 +24,21 @@ describe('LPCCompletionProvider', () => {
 			new vscode.CompletionItem(label, vscode.CompletionItemKind.Function);
 
 		mockKFunProvider = {
-			getCompletions: jest.fn().mockReturnValue([
+			getCompletionItems: jest.fn().mockReturnValue([
 				createMockCompletionItem('kfun1'),
 				createMockCompletionItem('kfun2')
 			])
 		};
 
 		mockKeywordProvider = {
-			getCompletions: jest.fn().mockReturnValue([
+			getCompletionItems: jest.fn().mockReturnValue([
 				createMockCompletionItem('keyword1'),
 				createMockCompletionItem('keyword2')
 			])
 		};
 
 		mockTypeProvider = {
-			getCompletions: jest.fn().mockReturnValue([
+			getCompletionItems: jest.fn().mockReturnValue([
 				createMockCompletionItem('type1'),
 				createMockCompletionItem('type2')
 			])
@@ -58,9 +58,9 @@ describe('LPCCompletionProvider', () => {
 			const completions = provider.provideCompletionItems(mockDocument, mockPosition);
 
 			expect(completions).toHaveLength(6);
-			expect(mockKFunProvider.getCompletions).toHaveBeenCalled();
-			expect(mockKeywordProvider.getCompletions).toHaveBeenCalled();
-			expect(mockTypeProvider.getCompletions).toHaveBeenCalled();
+			expect(mockKFunProvider.getCompletionItems).toHaveBeenCalled();
+			expect(mockKeywordProvider.getCompletionItems).toHaveBeenCalled();
+			expect(mockTypeProvider.getCompletionItems).toHaveBeenCalled();
 
 			const labels = completions.map(item => item.label);
 
@@ -73,7 +73,7 @@ describe('LPCCompletionProvider', () => {
 		});
 
 		test('should handle empty completions from providers', () => {
-			mockKFunProvider.getCompletions.mockReturnValue([]);
+			mockKFunProvider.getCompletionItems.mockReturnValue([]);
 
 			const completions = provider.provideCompletionItems(mockDocument, mockPosition);
 
@@ -81,8 +81,8 @@ describe('LPCCompletionProvider', () => {
 		});
 
 		test('should handle null/undefined completions from providers', () => {
-			mockKFunProvider.getCompletions.mockReturnValue(null);
-			mockKeywordProvider.getCompletions.mockReturnValue(undefined);
+			mockKFunProvider.getCompletionItems.mockReturnValue(null);
+			mockKeywordProvider.getCompletionItems.mockReturnValue(undefined);
 
 			const completions = provider.provideCompletionItems(mockDocument, mockPosition);
 			expect(completions).toHaveLength(2);

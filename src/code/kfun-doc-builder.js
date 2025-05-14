@@ -7,7 +7,7 @@ export default class KFunDocBuilder {
 		return kfunsData;
 	}
 
-	getCompletions() {
+	getCompletionItems() {
 		return Object.entries(this.getKfunsData().kfuns)
 			.map(([kfunName, kfun]) => this.createCompletionItem(kfunName, kfun));
 	}
@@ -38,7 +38,7 @@ export default class KFunDocBuilder {
 		}
 
 		if (kfun.synopsis) {
-			documentation.appendCodeblock(kfun.synopsis.trim(), 'c');
+			documentation.appendCodeblock(kfun.synopsis.trim(), 'lpc');
 			documentation.appendMarkdown('\n');
 		}
 
