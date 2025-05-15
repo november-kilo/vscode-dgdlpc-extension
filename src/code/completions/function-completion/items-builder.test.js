@@ -2,127 +2,115 @@ import * as vscode from 'vscode';
 import FunctionCompletionItemsBuilder from './items-builder';
 import FunctionDocBuilder from '../../function-doc-builder';
 
-// Mock FunctionDocBuilder
 jest.mock('../../function-doc-builder');
+
+jest.mock('vscode', () => ({
+	CompletionItem: jest.fn().mockImplementation((label, kind) => ({
+		label,
+		kind,
+		documentation: null,
+		detail: null
+	})),
+	CompletionItemKind: {
+		Function: 'Function'
+	}
+}));
 
 describe('FunctionCompletionItemsBuilder', () => {
 	let mockDocument;
-	let mockFunctions;
-	let mockCreateDocumentation;
 
 	beforeEach(() => {
-		// Reset all mocks
+		mockDocument = { uri: 'file:///test.lpc' };
 		jest.clearAllMocks();
-
-		// Mock document
-		mockDocument = {
-			uri: 'test-uri'
-		};
-
-		// Setup mock for createDocumentation
-		mockCreateDocumentation = jest.fn().mockReturnValue('Mock documentation');
-
-		// Mock the FunctionDocBuilder constructor and its method
-		FunctionDocBuilder.mockImplementation(() => ({
-			createDocumentation: mockCreateDocumentation
-		}));
-
-		// Mock CompletionItem constructor
-		vscode.CompletionItem.mockImplementation((label, kind) => ({
-			label,
-			kind,
-			documentation: null,
-			detail: null
-		}));
 	});
 
 	test('returns empty array for empty functions map', () => {
-		mockFunctions = new Map();
-
-		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, mockFunctions);
-
+		const functions = new Map();
+		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
 		expect(result).toEqual([]);
-		expect(FunctionDocBuilder).toHaveBeenCalledWith(mockDocument);
-		expect(vscode.CompletionItem).not.toHaveBeenCalled();
 	});
 
-	test('creates completion items for single function', () => {
-		const mockFuncInfo = {
-			name: 'testFunc',
+	test('creates completion item for single function', () => {
+		const mockFunction = {
+			name: 'test_func',
 			returnType: 'void',
-			parameters: ['int param1', 'string param2']
+			parameters: []
 		};
+		const functions = new Map([['test_func', mockFunction]]);
 
-		mockFunctions = new Map([
-			['testFunc', mockFuncInfo]
-		]);
+		const mockDocumentation = { value: 'Function documentation' };
+		const mockDetail = 'void test_func()';
 
-		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, mockFunctions);
+		FunctionDocBuilder.createDocumentation.mockReturnValue(mockDocumentation);
+		FunctionDocBuilder.createDetail.mockReturnValue(mockDetail);
+
+		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
 
 		expect(result).toHaveLength(1);
-		expect(vscode.CompletionItem).toHaveBeenCalledWith('testFunc', vscode.CompletionItemKind.Function);
-
-		const completionItem = result[0];
-		expect(completionItem.documentation).toBe('Mock documentation');
-		expect(completionItem.detail).toBe('void testFunc(int param1, string param2)');
+		expect(vscode.CompletionItem).toHaveBeenCalledWith('test_func', 'Function');
+		expect(FunctionDocBuilder.createDocumentation).toHaveBeenCalledWith(mockFunction);
+		expect(FunctionDocBuilder.createDetail).toHaveBeenCalledWith(mockFunction);
+		expect(result[0]).toEqual({
+			label: 'test_func',
+			kind: 'Function',
+			documentation: mockDocumentation,
+			detail: mockDetail
+		});
 	});
 
 	test('creates completion items for multiple functions', () => {
-		mockFunctions = new Map([
-			['func1', {
-				name: 'func1',
-				returnType: 'int',
-				parameters: ['float x']
-			}],
-			['func2', {
-				name: 'func2',
-				returnType: 'string',
-				parameters: []
-			}]
+		const functions = new Map([
+			['func1', { name: 'func1', returnType: 'int' }],
+			['func2', { name: 'func2', returnType: 'string' }],
+			['func3', { name: 'func3', returnType: 'void' }]
 		]);
 
-		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, mockFunctions);
+		FunctionDocBuilder.createDocumentation.mockImplementation(
+			(func) => ({ value: `Doc for ${func.name}` })
+		);
+		FunctionDocBuilder.createDetail.mockImplementation(
+			(func) => `${func.returnType} ${func.name}()`
+		);
 
-		expect(result).toHaveLength(2);
+		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
 
-		// Check first completion item
-		expect(result[0].label).toBe('func1');
-		expect(result[0].detail).toBe('int func1(float x)');
+		expect(result).toHaveLength(3);
+		expect(vscode.CompletionItem).toHaveBeenCalledTimes(3);
+		expect(FunctionDocBuilder.createDocumentation).toHaveBeenCalledTimes(3);
+		expect(FunctionDocBuilder.createDetail).toHaveBeenCalledTimes(3);
 
-		// Check second completion item
-		expect(result[1].label).toBe('func2');
-		expect(result[1].detail).toBe('string func2()');
+		functions.forEach((funcInfo, name) => {
+			const item = result.find(item => item.label === name);
+			expect(item).toBeDefined();
+			expect(item.kind).toBe('Function');
+			expect(item.documentation).toEqual({ value: `Doc for ${name}` });
+			expect(item.detail).toBe(`${funcInfo.returnType} ${name}()`);
+		});
 	});
 
-	test('handles functions with no parameters', () => {
-		mockFunctions = new Map([
-			['emptyFunc', {
-				name: 'emptyFunc',
-				returnType: 'void',
-				parameters: []
-			}]
-		]);
+	test('handles functions with complex information', () => {
+		const mockFunction = {
+			name: 'complex_func',
+			returnType: 'string*',
+			parameters: ['int x', 'float y'],
+			modifiers: ['private', 'static']
+		};
+		const functions = new Map([['complex_func', mockFunction]]);
 
-		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, mockFunctions);
+		const mockDocumentation = { value: 'Complex function documentation' };
+		const mockDetail = 'private static string* complex_func(int x, float y)';
+
+		FunctionDocBuilder.createDocumentation.mockReturnValue(mockDocumentation);
+		FunctionDocBuilder.createDetail.mockReturnValue(mockDetail);
+
+		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
 
 		expect(result).toHaveLength(1);
-		expect(result[0].detail).toBe('void emptyFunc()');
-	});
-
-	test('correctly uses FunctionDocBuilder for documentation', () => {
-		const mockFuncInfo = {
-			name: 'testFunc',
-			returnType: 'int',
-			parameters: ['string param']
-		};
-
-		mockFunctions = new Map([
-			['testFunc', mockFuncInfo]
-		]);
-
-		FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, mockFunctions);
-
-		// Verify that createDocumentation was called with the correct argument
-		expect(mockCreateDocumentation).toHaveBeenCalledWith(mockFuncInfo);
+		expect(result[0]).toEqual({
+			label: 'complex_func',
+			kind: 'Function',
+			documentation: mockDocumentation,
+			detail: mockDetail
+		});
 	});
 });

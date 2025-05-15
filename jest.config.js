@@ -19,6 +19,7 @@ module.exports = {
 	collectCoverageFrom: [
 		'./src/**/*.{js,jsx}',
 		'!./src/lpc/parser/**',
+		'!./src/code/logger.js',
 		'!./src/code/lpc-parser-factory.js'
 	],
 	coverageDirectory: 'coverage',

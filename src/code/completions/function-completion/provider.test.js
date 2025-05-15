@@ -1,119 +1,178 @@
-import * as vscode from 'vscode';
 import FunctionCompletionProvider from './provider';
-import LPCParserFactory from '../../lpc-parser-factory';
 import FunctionCompletionItemsBuilder from './items-builder';
-import FunctionDeclarationVisitor from '../../visitors/function-visitor';
+import visitFunctions from '../../visitors/function-visitor';
 
-// Mock dependencies
-jest.mock('../../lpc-parser-factory', () => ({
-	createParser: jest.fn().mockReturnValue({
-		program: jest.fn().mockReturnValue({})
-	})
-}));
-
-jest.mock('../../visitors/function-visitor');
 jest.mock('./items-builder');
+jest.mock('../../visitors/function-visitor');
 
 describe('FunctionCompletionProvider', () => {
 	let provider;
 	let mockDocument;
 	let mockPosition;
+	let mockToken;
+	let mockContext;
 
 	beforeEach(() => {
+		provider = new FunctionCompletionProvider();
+
+		// Reset mocks
 		jest.clearAllMocks();
 
-		// Setup mocks
-		FunctionCompletionItemsBuilder.getCompletionItems = jest.fn().mockImplementation((document, functions) => {
-			const items = [];
-			for (const [name, funcInfo] of functions) {
-				const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Function);
-				items.push(item);
-			}
-			return items;
-		});
+		// Setup common mock values
+		mockPosition = { character: 5, line: 0 };
+		mockToken = {};
+		mockContext = {};
+	});
 
+	test('returns empty array when line prefix contains invalid characters', async () => {
 		mockDocument = {
-			getText: jest.fn().mockReturnValue('mock code'),
-			uri: { toString: jest.fn() },
-			lineAt: jest.fn().mockReturnValue({ text: 'test_' })
+			lineAt: jest.fn().mockReturnValue({
+				text: 'foo.bar'
+			})
 		};
 
-		mockPosition = { character: 5 };
-
-		provider = new FunctionCompletionProvider();
-	});
-
-	test('constructor initializes with visitor', () => {
-		expect(provider.visitor).toBeInstanceOf(FunctionDeclarationVisitor);
-	});
-
-	test('provides no completions for invalid prefix patterns', async () => {
-		const invalidPrefixes = [
-			{ text: '!func', pos: 5 },
-			{ text: ' func', pos: 5 },
-			{ text: '123!', pos: 4 }
-		];
-
-		for (const { text, pos } of invalidPrefixes) {
-			mockDocument.lineAt.mockReturnValue({ text });
-			mockPosition.character = pos;
-
-			const result = await provider.provideCompletionItems(mockDocument, mockPosition);
-			expect(result).toEqual([]);
-			expect(FunctionCompletionItemsBuilder.getCompletionItems).not.toHaveBeenCalled();
-		}
-	});
-
-	test('provides completions for valid prefix patterns', async () => {
-		const validPrefixes = [
-			{ text: 'func', pos: 4 },
-			{ text: 'test_', pos: 5 },
-			{ text: 'abc123', pos: 6 }
-		];
-
-		// Mock visitor to return some functions
-		provider.visitor.visit.mockImplementation((tree, functions) => {
-			functions.set('test_func', {
-				returnType: 'void',
-				parameters: [],
-				documentation: 'Test function'
-			});
-		});
-
-		for (const { text, pos } of validPrefixes) {
-			mockDocument.lineAt.mockReturnValue({ text });
-			mockPosition.character = pos;
-
-			const result = await provider.provideCompletionItems(mockDocument, mockPosition);
-
-			expect(result).toHaveLength(1);
-			expect(result[0]).toEqual(expect.objectContaining({
-				label: 'test_func',
-				kind: vscode.CompletionItemKind.Function
-			}));
-			expect(FunctionCompletionItemsBuilder.getCompletionItems).toHaveBeenCalled();
-		}
-	});
-
-	test('returns empty array when no functions are found', async () => {
-		// Mock visitor to return no functions
-		provider.visitor.visit.mockImplementation((tree, functions) => {});
-
-		const result = await provider.provideCompletionItems(mockDocument, mockPosition);
+		const result = await provider.provideCompletionItems(
+			mockDocument,
+			mockPosition,
+			mockToken,
+			mockContext
+		);
 
 		expect(result).toEqual([]);
+		expect(visitFunctions).not.toHaveBeenCalled();
 		expect(FunctionCompletionItemsBuilder.getCompletionItems).not.toHaveBeenCalled();
 	});
 
-	test('handles parser errors gracefully', async () => {
-		// Mock parser to throw an error
-		LPCParserFactory.createParser.mockImplementation(() => {
-			throw new Error('Parser error');
-		});
+	test('returns empty array when line prefix contains special characters', async () => {
+		mockDocument = {
+			lineAt: jest.fn().mockReturnValue({
+				text: 'foo->bar'
+			})
+		};
 
-		const result = await provider.provideCompletionItems(mockDocument, mockPosition);
+		const result = await provider.provideCompletionItems(
+			mockDocument,
+			mockPosition,
+			mockToken,
+			mockContext
+		);
 
 		expect(result).toEqual([]);
+		expect(visitFunctions).not.toHaveBeenCalled();
 		expect(FunctionCompletionItemsBuilder.getCompletionItems).not.toHaveBeenCalled();
+	});
+
+	test('processes valid line prefix and returns completion items', async () => {
+		mockDocument = {
+			lineAt: jest.fn().mockReturnValue({
+				text: '    func'
+			})
+		};
+
+		const mockFunctions = new Map([
+			['function1', { /* function details */ }]
+		]);
+		const mockCompletionItems = [{ label: 'function1' }];
+
+		visitFunctions.mockReturnValue(mockFunctions);
+		FunctionCompletionItemsBuilder.getCompletionItems.mockReturnValue(mockCompletionItems);
+
+		const result = await provider.provideCompletionItems(
+			mockDocument,
+			mockPosition,
+			mockToken,
+			mockContext
+		);
+
+		expect(visitFunctions).toHaveBeenCalledWith(mockDocument);
+		expect(FunctionCompletionItemsBuilder.getCompletionItems).toHaveBeenCalledWith(
+			mockDocument,
+			mockFunctions
+		);
+		expect(result).toBe(mockCompletionItems);
+	});
+
+	test('handles empty line prefix', async () => {
+		mockDocument = {
+			lineAt: jest.fn().mockReturnValue({
+				text: ''
+			})
+		};
+
+		const mockFunctions = new Map();
+		const mockCompletionItems = [];
+
+		visitFunctions.mockReturnValue(mockFunctions);
+		FunctionCompletionItemsBuilder.getCompletionItems.mockReturnValue(mockCompletionItems);
+
+		const result = await provider.provideCompletionItems(
+			mockDocument,
+			mockPosition,
+			mockToken,
+			mockContext
+		);
+
+		expect(visitFunctions).toHaveBeenCalledWith(mockDocument);
+		expect(FunctionCompletionItemsBuilder.getCompletionItems).toHaveBeenCalledWith(
+			mockDocument,
+			mockFunctions
+		);
+		expect(result).toBe(mockCompletionItems);
+	});
+
+	test('processes line prefix with only whitespace', async () => {
+		mockDocument = {
+			lineAt: jest.fn().mockReturnValue({
+				text: '    '
+			})
+		};
+
+		const mockFunctions = new Map();
+		const mockCompletionItems = [];
+
+		visitFunctions.mockReturnValue(mockFunctions);
+		FunctionCompletionItemsBuilder.getCompletionItems.mockReturnValue(mockCompletionItems);
+
+		const result = await provider.provideCompletionItems(
+			mockDocument,
+			mockPosition,
+			mockToken,
+			mockContext
+		);
+
+		expect(visitFunctions).toHaveBeenCalledWith(mockDocument);
+		expect(FunctionCompletionItemsBuilder.getCompletionItems).toHaveBeenCalledWith(
+			mockDocument,
+			mockFunctions
+		);
+		expect(result).toBe(mockCompletionItems);
+	});
+
+	test('processes line prefix with valid identifier characters', async () => {
+		mockDocument = {
+			lineAt: jest.fn().mockReturnValue({
+				text: '    my_func123'
+			})
+		};
+
+		const mockFunctions = new Map();
+		const mockCompletionItems = [];
+
+		visitFunctions.mockReturnValue(mockFunctions);
+		FunctionCompletionItemsBuilder.getCompletionItems.mockReturnValue(mockCompletionItems);
+
+		const result = await provider.provideCompletionItems(
+			mockDocument,
+			mockPosition,
+			mockToken,
+			mockContext
+		);
+
+		expect(visitFunctions).toHaveBeenCalledWith(mockDocument);
+		expect(FunctionCompletionItemsBuilder.getCompletionItems).toHaveBeenCalledWith(
+			mockDocument,
+			mockFunctions
+		);
+		expect(result).toBe(mockCompletionItems);
 	});
 });

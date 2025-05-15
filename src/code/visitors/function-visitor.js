@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import FunctionCompletionParameters from '../completions/function-completion/parameters';
+import LPCParserFactory from '../lpc-parser-factory';
 
-export default class FunctionDeclarationVisitor {
+class FunctionDeclarationVisitor {
 	visit(ctx, functions, documentUri) {
 		if (!ctx) {
 			return;
@@ -110,3 +111,17 @@ export default class FunctionDeclarationVisitor {
 		}
 	}
 }
+
+function visitFunctions(document) {
+	const visitor = new FunctionDeclarationVisitor();
+	const text = document.getText();
+	const parser = LPCParserFactory.createParser(text);
+	const tree = parser.program();
+	const functions = new Map();
+
+	visitor.visit(tree, functions, document.uri);
+
+	return functions;
+}
+
+export default visitFunctions;

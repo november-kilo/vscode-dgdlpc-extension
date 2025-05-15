@@ -49,33 +49,6 @@ describe('KfunsHoverHandler', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('canHandle', () => {
-		test('returns false for no range', () => {
-			mockDocument.getWordRangeAtPosition.mockReturnValue(null);
-
-			const canHandle = handler.canHandle(mockDocument, mockPosition);
-
-			expect(canHandle).toBe(false);
-		});
-
-		test('returns false for unknown kfun', () => {
-			mockDocument.getWordRangeAtPosition.mockReturnValue(mockRange);
-			mockDocument.getText.mockReturnValue('unknown_fun');
-
-			const canHandle = handler.canHandle(mockDocument, mockPosition);
-
-			expect(canHandle).toBe(false);
-		});
-
-		test('returns true for known kfun', () => {
-			mockDocument.getText.mockReturnValue('test_fun');
-
-			const canHandle = handler.canHandle(mockDocument, mockPosition);
-
-			expect(canHandle).toBe(true);
-		});
-	});
-
 	describe('hover content generation', () => {
 		test('generates no hover when no range', () => {
 			mockDocument.getWordRangeAtPosition.mockReturnValue(null);

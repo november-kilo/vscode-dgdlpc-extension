@@ -21,16 +21,6 @@ export default class KfunsHoverHandler extends HoverHandler {
 		return this.docBuilder.createDocumentation(name, kfun);
 	}
 
-	canHandle(document, position) {
-		const range = document.getWordRangeAtPosition(position);
-		if (!range) {
-			return false;
-		}
-
-		const word = document.getText(range);
-		return this.processedKfuns.has(word);
-	}
-
 	createHover(document, position) {
 		const range = document.getWordRangeAtPosition(position);
 		if (!range) {

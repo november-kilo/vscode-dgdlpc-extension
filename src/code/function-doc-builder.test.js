@@ -1,76 +1,139 @@
 import * as vscode from 'vscode';
 import FunctionDocBuilder from './function-doc-builder';
+import MarkdownUtil from './markdown-util';
+
+jest.mock('./markdown-util', () => ({
+	lineLink: jest.fn()
+}));
 
 describe('FunctionDocBuilder', () => {
-	let builder;
-	let mockDocument;
-
 	beforeEach(() => {
-		mockDocument = { uri: { fsPath: 'test/file.c' } };
-		builder = new FunctionDocBuilder(mockDocument);
+		// Clear all mocks before each test
+		jest.clearAllMocks();
 	});
 
-	test('creates empty documentation when no locations exist', () => {
-		const functionInfo = {
-			forwardDeclarationLocation: null,
-			definitionLocation: null
-		};
+	describe('createDetail', () => {
+		it('should create function detail string correctly', () => {
+			const functionInfo = {
+				returnType: 'void',
+				name: 'testFunction',
+				parameters: ['int a', 'string b']
+			};
 
-		const doc = builder.createDocumentation(functionInfo);
+			const result = FunctionDocBuilder.createDetail(functionInfo);
+			expect(result).toBe('void testFunction(int a, string b)');
+		});
 
-		expect(doc.appendMarkdown).not.toHaveBeenCalled();
+		it('should handle empty parameters', () => {
+			const functionInfo = {
+				returnType: 'int',
+				name: 'emptyParamsFunction',
+				parameters: []
+			};
+
+			const result = FunctionDocBuilder.createDetail(functionInfo);
+			expect(result).toBe('int emptyParamsFunction()');
+		});
 	});
 
-	test('creates documentation with declaration only', () => {
-		const functionInfo = {
-			forwardDeclarationLocation: {
-				range: { start: { line: 9 } }
-			},
-			definitionLocation: null
-		};
+	describe('initializeMarkdownString', () => {
+		it('should initialize MarkdownString with correct properties', () => {
+			const markdown = FunctionDocBuilder.initializeMarkdownString();
 
-		const doc = builder.createDocumentation(functionInfo);
-
-		expect(doc.appendMarkdown).toHaveBeenCalledWith('Declared on [line 10](file://test/file.c#10)\n');
-		expect(doc.appendMarkdown).toHaveBeenCalledTimes(1);
+			expect(vscode.MarkdownString).toHaveBeenCalled();
+			expect(markdown.isTrusted).toBe(true);
+			expect(markdown.supportThemeIcons).toBe(true);
+			expect(markdown.supportHtml).toBe(true);
+		});
 	});
 
-	test('creates documentation with definition only', () => {
-		const functionInfo = {
-			forwardDeclarationLocation: null,
-			definitionLocation: {
-				range: { start: { line: 19 } }
-			}
-		};
+	describe('appendLocation', () => {
+		it('should not append anything if location is null', () => {
+			const documentation = {
+				appendMarkdown: jest.fn()
+			};
 
-		const doc = builder.createDocumentation(functionInfo);
+			FunctionDocBuilder.appendLocation(documentation, {
+				location: null,
+				label: 'Test',
+				addNewline: false
+			}, false);
 
-		expect(doc.appendMarkdown).toHaveBeenCalledWith('Defined on [line 20](file://test/file.c#20)');
-		expect(doc.appendMarkdown).toHaveBeenCalledTimes(1);
+			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
+		});
+
+		it('should append location with correct format', () => {
+			const documentation = {
+				appendMarkdown: jest.fn()
+			};
+			const location = {
+				range: {
+					start: { line: 9 } // Line 9 will become line 10 in display
+				}
+			};
+			const document = 'testDoc';
+
+			MarkdownUtil.lineLink.mockReturnValue('[line 10](link)');
+
+			FunctionDocBuilder.appendLocation(documentation, {
+				document,
+				location,
+				label: 'Test',
+				addNewline: true
+			}, false);
+
+			expect(documentation.appendMarkdown).toHaveBeenCalledWith('Test on [line 10](link)\n');
+			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(10, document);
+		});
 	});
 
-	test('creates documentation with both declaration and definition', () => {
-		const functionInfo = {
-			forwardDeclarationLocation: {
-				range: { start: { line: 9 } }
-			},
-			definitionLocation: {
-				range: { start: { line: 19 } }
-			}
-		};
+	describe('createDocumentation', () => {
+		it('should create documentation with both locations', () => {
+			const functionInfo = {
+				forwardDeclarationLocation: {
+					range: { start: { line: 4 } }
+				},
+				definitionLocation: {
+					range: { start: { line: 9 } }
+				}
+			};
 
-		const doc = builder.createDocumentation(functionInfo);
+			MarkdownUtil.lineLink
+				.mockReturnValueOnce('[line 5](decl-link)')
+				.mockReturnValueOnce('[line 10](def-link)');
 
-		expect(doc.appendMarkdown).toHaveBeenCalledTimes(2);
-		expect(doc.appendMarkdown).toHaveBeenNthCalledWith(1, 'Declared on [line 10](file://test/file.c#10)\n');
-		expect(doc.appendMarkdown).toHaveBeenNthCalledWith(2, 'Defined on [line 20](file://test/file.c#20)');
-	});
+			const documentation = FunctionDocBuilder.createDocumentation(functionInfo, false);
 
-	test('initializes markdown string with correct properties', () => {
-		const doc = builder.initializeMarkdownString();
+			expect(documentation.appendMarkdown).toHaveBeenCalledTimes(2);
+			expect(documentation.appendMarkdown).toHaveBeenNthCalledWith(1, 'Declared on [line 5](decl-link)\n');
+			expect(documentation.appendMarkdown).toHaveBeenNthCalledWith(2, 'Defined on [line 10](def-link)');
+		});
 
-		expect(doc.isTrusted).toBe(true);
-		expect(doc.supportThemeIcons).toBe(true);
-		expect(doc.supportHtml).toBe(true);
+		it('should handle missing locations', () => {
+			const functionInfo = {
+				forwardDeclarationLocation: null,
+				definitionLocation: null
+			};
+
+			const documentation = FunctionDocBuilder.createDocumentation(functionInfo, false);
+
+			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
+		});
+
+		it('should use location instead of document when fromLocation is true', () => {
+			const functionInfo = {
+				forwardDeclarationLocation: {
+					range: { start: { line: 4 } }
+				},
+				definitionLocation: {
+					range: { start: { line: 9 } }
+				}
+			};
+
+			const documentation = FunctionDocBuilder.createDocumentation(functionInfo, true);
+
+			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(5, functionInfo.forwardDeclarationLocation);
+			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(10, functionInfo.definitionLocation);
+		});
 	});
 });

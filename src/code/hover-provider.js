@@ -1,16 +1,20 @@
 import KfunsHoverHandler from './hover/hover-handler-kfuns';
+import FunctionsHoverHandler from './hover/hover-handler-functions';
+import FunctionDocBuilder from './function-doc-builder';
 
 export default class LPCHoverProvider {
 	constructor(hoverHandlers = [
-		new KfunsHoverHandler()
+		new KfunsHoverHandler(),
+		new FunctionsHoverHandler()
 	]) {
 		this.hoverHandlers = hoverHandlers;
 	}
 
 	provideHover(document, position) {
 		for (const handler of this.hoverHandlers) {
-			if (handler.canHandle(document, position)) {
-				return handler.createHover(document, position);
+			const hover = handler.createHover(document, position);
+			if (hover) {
+				return hover;
 			}
 		}
 		return null;
