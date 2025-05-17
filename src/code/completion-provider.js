@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import KFunCompletionProvider from './completions/kfun-completion/provider';
 import KeywordCompletionProvider from './completions/word-completion/keyword-completion-provider';
 import TypeCompletionProvider from './completions/word-completion/type-completion-provider';

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import FunctionsHoverHandler from './hover-handler-functions';
-import visitFunctions from '../visitors/function-visitor';
-import FunctionDocBuilder from '../function-doc-builder';
+import visitFunctions from '../visitors/function-visitor/visitor';
+import DocBuilder from '../doc-builder';
 
-jest.mock('../visitors/function-visitor');
-jest.mock('../function-doc-builder');
+jest.mock('../visitors/function-visitor/visitor');
+jest.mock('../doc-builder');
 
 describe('FunctionsHoverHandler', () => {
 	let handler;
@@ -50,8 +50,8 @@ describe('FunctionsHoverHandler', () => {
 		const mockDetail = 'void testFunction(int x, string y)';
 		const mockDocumentation = { value: 'Function documentation' };
 
-		FunctionDocBuilder.createDetail.mockReturnValue(mockDetail);
-		FunctionDocBuilder.createDocumentation.mockReturnValue(mockDocumentation);
+		DocBuilder.createDetail.mockReturnValue(mockDetail);
+		DocBuilder.functionDocumentation.mockReturnValue(mockDocumentation);
 
 		const result = handler.createHover(mockDocument, mockPosition);
 
@@ -59,12 +59,12 @@ describe('FunctionsHoverHandler', () => {
 		expect(mockDocument.getText).toHaveBeenCalledWith(mockRange);
 		expect(visitFunctions).toHaveBeenCalledWith(mockDocument);
 
-		expect(FunctionDocBuilder.createDetail).toHaveBeenCalledWith({
+		expect(DocBuilder.createDetail).toHaveBeenCalledWith({
 			...mockFunctionInfo,
 			document: mockDocument
 		});
 
-		expect(FunctionDocBuilder.createDocumentation).toHaveBeenCalledWith({
+		expect(DocBuilder.functionDocumentation).toHaveBeenCalledWith({
 			...mockFunctionInfo,
 			document: mockDocument
 		}, true);
@@ -100,12 +100,12 @@ describe('FunctionsHoverHandler', () => {
 		const mockDetail = 'int testFunction()';
 		const mockDocumentation = { value: 'Function documentation' };
 
-		FunctionDocBuilder.createDetail.mockReturnValue(mockDetail);
-		FunctionDocBuilder.createDocumentation.mockReturnValue(mockDocumentation);
+		DocBuilder.createDetail.mockReturnValue(mockDetail);
+		DocBuilder.functionDocumentation.mockReturnValue(mockDocumentation);
 
 		handler.createHover(mockDocument, mockPosition);
 
-		expect(FunctionDocBuilder.createDetail).toHaveBeenCalledWith({
+		expect(DocBuilder.createDetail).toHaveBeenCalledWith({
 			...mockFunctionInfo,
 			document: mockDocument
 		});
@@ -128,7 +128,7 @@ describe('FunctionsHoverHandler', () => {
 		expect(mockDocument.getWordRangeAtPosition).toHaveBeenCalledWith(mockPosition);
 		expect(mockDocument.getText).toHaveBeenCalledWith(mockRange);
 		expect(visitFunctions).toHaveBeenCalledWith(mockDocument);
-		expect(FunctionDocBuilder.createDetail).not.toHaveBeenCalled();
-		expect(FunctionDocBuilder.createDocumentation).not.toHaveBeenCalled();
+		expect(DocBuilder.createDetail).not.toHaveBeenCalled();
+		expect(DocBuilder.functionDocumentation).not.toHaveBeenCalled();
 	});
 });

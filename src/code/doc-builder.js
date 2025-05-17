@@ -1,12 +1,28 @@
 import * as vscode from 'vscode';
 import MarkdownUtil from './markdown-util';
+import Logger from './logger';
 
-export default class FunctionDocBuilder {
+export default class DocBuilder {
 	static createDetail(functionInfo) {
 		return `${functionInfo.returnType} ${functionInfo.name}(${functionInfo.parameters.join(', ')})`;
 	}
 
-	static createDocumentation(functionInfo, fromLocation = false) {
+	static variableDocumentation({ name, varInfo, scope }) {
+		const documentation = this.initializeMarkdownString();
+
+		documentation.appendMarkdown(`**${scope}**: \`${name}\`\n\n`);
+		documentation.appendMarkdown(`Type: \`${varInfo.type}${varInfo.arrayDimension ? '[]'.repeat(varInfo.arrayDimension) : ''}\`\n\n`);
+
+		if (varInfo.modifiers) {
+			documentation.appendMarkdown(`Modifiers: \`${varInfo.modifiers}\`\n\n`);
+		}
+
+		documentation.appendMarkdown(`Declared at line ${varInfo.position.start.line + 1}, column ${varInfo.position.start.character + 1}`);
+
+		return documentation;
+	}
+
+	static functionDocumentation(functionInfo, fromLocation = false) {
 		const documentation = this.initializeMarkdownString();
 
 		const locations = [
@@ -15,7 +31,7 @@ export default class FunctionDocBuilder {
 		];
 
 		locations.forEach(config =>
-			FunctionDocBuilder.appendLocation(documentation, config, fromLocation)
+			DocBuilder.appendLocation(documentation, config, fromLocation)
 		);
 
 		return documentation;

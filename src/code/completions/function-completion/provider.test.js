@@ -1,9 +1,9 @@
 import FunctionCompletionProvider from './provider';
 import FunctionCompletionItemsBuilder from './items-builder';
-import visitFunctions from '../../visitors/function-visitor';
+import visitFunctions from '../../visitors/function-visitor/visitor';
 
 jest.mock('./items-builder');
-jest.mock('../../visitors/function-visitor');
+jest.mock('../../visitors/function-visitor/visitor');
 
 describe('FunctionCompletionProvider', () => {
 	let provider;

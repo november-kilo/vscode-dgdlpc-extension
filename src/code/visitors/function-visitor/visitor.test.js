@@ -1,5 +1,4 @@
-import visitFunctions from './function-visitor';
-import Logger from '../logger';
+import visitFunctions from './visitor';
 
 describe('visitFunctions', () => {
 	function createMockDocument(content) {

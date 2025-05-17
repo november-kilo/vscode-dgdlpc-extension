@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import FunctionDocBuilder from '../../function-doc-builder';
+import DocBuilder from '../../doc-builder';
 
 export default class FunctionCompletionItemsBuilder {
 	static getCompletionItems(document, functions) {
@@ -20,8 +20,8 @@ export default class FunctionCompletionItemsBuilder {
 				.join(', ');
 
 			completion.insertText = new vscode.SnippetString(`${name}(${snippetArgs});`);
-			completion.documentation = FunctionDocBuilder.createDocumentation(funcInfo);
-			completion.detail = FunctionDocBuilder.createDetail(funcInfo);
+			completion.documentation = DocBuilder.functionDocumentation(funcInfo);
+			completion.detail = DocBuilder.createDetail(funcInfo);
 
 			completions.push(completion);
 		}

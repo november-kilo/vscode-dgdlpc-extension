@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import FunctionDocBuilder from './function-doc-builder';
+import DocBuilder from './doc-builder';
 import MarkdownUtil from './markdown-util';
 
 jest.mock('./markdown-util', () => ({
 	lineLink: jest.fn()
 }));
 
-describe('FunctionDocBuilder', () => {
+describe('DocBuilder', () => {
 	beforeEach(() => {
 		// Clear all mocks before each test
 		jest.clearAllMocks();
@@ -20,7 +20,7 @@ describe('FunctionDocBuilder', () => {
 				parameters: ['int a', 'string b']
 			};
 
-			const result = FunctionDocBuilder.createDetail(functionInfo);
+			const result = DocBuilder.createDetail(functionInfo);
 			expect(result).toBe('void testFunction(int a, string b)');
 		});
 
@@ -31,14 +31,14 @@ describe('FunctionDocBuilder', () => {
 				parameters: []
 			};
 
-			const result = FunctionDocBuilder.createDetail(functionInfo);
+			const result = DocBuilder.createDetail(functionInfo);
 			expect(result).toBe('int emptyParamsFunction()');
 		});
 	});
 
 	describe('initializeMarkdownString', () => {
 		it('should initialize MarkdownString with correct properties', () => {
-			const markdown = FunctionDocBuilder.initializeMarkdownString();
+			const markdown = DocBuilder.initializeMarkdownString();
 
 			expect(vscode.MarkdownString).toHaveBeenCalled();
 			expect(markdown.isTrusted).toBe(true);
@@ -53,7 +53,7 @@ describe('FunctionDocBuilder', () => {
 				appendMarkdown: jest.fn()
 			};
 
-			FunctionDocBuilder.appendLocation(documentation, {
+			DocBuilder.appendLocation(documentation, {
 				location: null,
 				label: 'Test',
 				addNewline: false
@@ -75,7 +75,7 @@ describe('FunctionDocBuilder', () => {
 
 			MarkdownUtil.lineLink.mockReturnValue('[line 10](link)');
 
-			FunctionDocBuilder.appendLocation(documentation, {
+			DocBuilder.appendLocation(documentation, {
 				document,
 				location,
 				label: 'Test',
@@ -102,7 +102,7 @@ describe('FunctionDocBuilder', () => {
 				.mockReturnValueOnce('[line 5](decl-link)')
 				.mockReturnValueOnce('[line 10](def-link)');
 
-			const documentation = FunctionDocBuilder.createDocumentation(functionInfo, false);
+			const documentation = DocBuilder.functionDocumentation(functionInfo, false);
 
 			expect(documentation.appendMarkdown).toHaveBeenCalledTimes(2);
 			expect(documentation.appendMarkdown).toHaveBeenNthCalledWith(1, 'Declared on [line 5](decl-link)\n');
@@ -115,7 +115,7 @@ describe('FunctionDocBuilder', () => {
 				definitionLocation: null
 			};
 
-			const documentation = FunctionDocBuilder.createDocumentation(functionInfo);
+			const documentation = DocBuilder.functionDocumentation(functionInfo);
 
 			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
 		});
@@ -126,7 +126,7 @@ describe('FunctionDocBuilder', () => {
 				definitionLocation: null
 			};
 
-			const documentation = FunctionDocBuilder.createDocumentation(functionInfo, false);
+			const documentation = DocBuilder.functionDocumentation(functionInfo, false);
 
 			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
 		});
@@ -141,10 +141,127 @@ describe('FunctionDocBuilder', () => {
 				}
 			};
 
-			const documentation = FunctionDocBuilder.createDocumentation(functionInfo, true);
+			const documentation = DocBuilder.functionDocumentation(functionInfo, true);
 
 			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(5, functionInfo.forwardDeclarationLocation);
 			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(10, functionInfo.definitionLocation);
+		});
+	});
+
+	describe('variableDocumentation', () => {
+		let mockMarkdownString;
+
+		beforeEach(() => {
+			mockMarkdownString = {
+				appendMarkdown: jest.fn()
+			};
+			jest.spyOn(DocBuilder, 'initializeMarkdownString').mockReturnValue(mockMarkdownString);
+		});
+
+		it('should create basic variable documentation', () => {
+			const varInfo = {
+				type: 'string',
+				position: {
+					start: { line: 5, character: 8 }
+				}
+			};
+
+			DocBuilder.variableDocumentation({
+				name: 'testVar',
+				varInfo,
+				scope: 'Local Variable'
+			});
+
+			expect(mockMarkdownString.appendMarkdown).toHaveBeenNthCalledWith(
+				1,
+				'**Local Variable**: `testVar`\n\n'
+			);
+			expect(mockMarkdownString.appendMarkdown).toHaveBeenNthCalledWith(
+				2,
+				'Type: `string`\n\n'
+			);
+			expect(mockMarkdownString.appendMarkdown).toHaveBeenNthCalledWith(
+				3,
+				'Declared at line 6, column 9'
+			);
+		});
+
+		it('should handle array types correctly', () => {
+			const varInfo = {
+				type: 'number',
+				arrayDimension: 2,
+				position: {
+					start: { line: 0, character: 0 }
+				}
+			};
+
+			DocBuilder.variableDocumentation({
+				name: 'arrayVar',
+				varInfo,
+				scope: 'Global Variable'
+			});
+
+			expect(mockMarkdownString.appendMarkdown).toHaveBeenNthCalledWith(
+				2,
+				'Type: `number[][]`\n\n'
+			);
+		});
+
+		it('should include modifiers when present', () => {
+			const varInfo = {
+				type: 'boolean',
+				modifiers: 'private readonly',
+				position: {
+					start: { line: 10, character: 4 }
+				}
+			};
+
+			DocBuilder.variableDocumentation({
+				name: 'flag',
+				varInfo,
+				scope: 'Class Field'
+			});
+
+			expect(mockMarkdownString.appendMarkdown).toHaveBeenCalledWith(
+				'Modifiers: `private readonly`\n\n'
+			);
+		});
+
+		it('should skip modifiers section when not present', () => {
+			const varInfo = {
+				type: 'number',
+				position: {
+					start: { line: 0, character: 0 }
+				}
+			};
+
+			DocBuilder.variableDocumentation({
+				name: 'simple',
+				varInfo,
+				scope: 'Local Variable'
+			});
+
+			const calls = mockMarkdownString.appendMarkdown.mock.calls;
+			expect(calls.some(call => call[0].includes('Modifiers:'))).toBeFalsy();
+		});
+
+		it('should handle zero-based positions correctly', () => {
+			const varInfo = {
+				type: 'string',
+				position: {
+					start: { line: 0, character: 0 }
+				}
+			};
+
+			DocBuilder.variableDocumentation({
+				name: 'firstVar',
+				varInfo,
+				scope: 'Global Variable'
+			});
+
+			expect(mockMarkdownString.appendMarkdown).toHaveBeenCalledWith(
+				'Declared at line 1, column 1'
+			);
 		});
 	});
 });

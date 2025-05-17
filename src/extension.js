@@ -8,6 +8,7 @@ import LPCHoverProvider from './code/hover-provider';
 import DGDConfigManager from './dgd/config-manager';
 import DGDIntegration from './dgd/integration';
 import FunctionCompletionProvider from './code/completions/function-completion/provider';
+import VariableCompletionProvider from './code/completions/variable-completion/provider';
 
 function registerDGDCommands(context, dgd) {
 	context.subscriptions.push(
@@ -73,6 +74,7 @@ function setupLanguageProviders(context) {
 	const lpcCodeActionProvider = new LPCCodeActionProvider();
 	const lpcCompletionProvider = new LPCCompletionProvider();
 	const lpcFunctionCompletionProvider = new FunctionCompletionProvider();
+	const lpcVariableCompletionProvider = new VariableCompletionProvider();
 	const lpcHoverProvider = new LPCHoverProvider();
 
 	const lpcLanguageIdentifier = {
@@ -99,6 +101,10 @@ function setupLanguageProviders(context) {
 		vscode.languages.registerCompletionItemProvider(
 			lpcLanguageIdentifier,
 			lpcFunctionCompletionProvider
+		),
+		vscode.languages.registerCompletionItemProvider(
+			lpcLanguageIdentifier,
+			lpcVariableCompletionProvider
 		)
 	];
 

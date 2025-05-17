@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import FunctionCompletionItemsBuilder from './items-builder';
-import FunctionDocBuilder from '../../function-doc-builder';
+import DocBuilder from '../../doc-builder';
 
-jest.mock('../../function-doc-builder');
+jest.mock('../../doc-builder');
 
 describe('FunctionCompletionItemsBuilder', () => {
 	let mockDocument;
@@ -29,15 +29,15 @@ describe('FunctionCompletionItemsBuilder', () => {
 		const mockDocumentation = { value: 'Function documentation' };
 		const mockDetail = 'void test_func()';
 
-		FunctionDocBuilder.createDocumentation.mockReturnValue(mockDocumentation);
-		FunctionDocBuilder.createDetail.mockReturnValue(mockDetail);
+		DocBuilder.functionDocumentation.mockReturnValue(mockDocumentation);
+		DocBuilder.createDetail.mockReturnValue(mockDetail);
 
 		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
 
 		expect(result).toHaveLength(1);
 		expect(vscode.CompletionItem).toHaveBeenCalledWith('test_func', 'Function');
-		expect(FunctionDocBuilder.createDocumentation).toHaveBeenCalledWith(mockFunction);
-		expect(FunctionDocBuilder.createDetail).toHaveBeenCalledWith(mockFunction);
+		expect(DocBuilder.functionDocumentation).toHaveBeenCalledWith(mockFunction);
+		expect(DocBuilder.createDetail).toHaveBeenCalledWith(mockFunction);
 		expect(result[0]).toMatchObject({
 			label: 'test_func',
 			kind: 'Function',
@@ -58,8 +58,8 @@ describe('FunctionCompletionItemsBuilder', () => {
 		const mockDocumentation = { value: 'Complex function documentation' };
 		const mockDetail = 'private static string* complex_func(int x, float y)';
 
-		FunctionDocBuilder.createDocumentation.mockReturnValue(mockDocumentation);
-		FunctionDocBuilder.createDetail.mockReturnValue(mockDetail);
+		DocBuilder.functionDocumentation.mockReturnValue(mockDocumentation);
+		DocBuilder.createDetail.mockReturnValue(mockDetail);
 
 		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
 

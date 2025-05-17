@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import HoverHandler from './hover-handler';
-import visitFunctions from '../visitors/function-visitor';
-import FunctionDocBuilder from '../function-doc-builder';
+import visitFunctions from '../visitors/function-visitor/visitor';
+import DocBuilder from '../doc-builder';
 
 export default class FunctionsHoverHandler extends HoverHandler {
 	createHover(document, position) {
@@ -19,8 +19,8 @@ export default class FunctionsHoverHandler extends HoverHandler {
 		}
 
 		functionInfo.document = document;
-		const detail = FunctionDocBuilder.createDetail(functionInfo);
-		const documentation = FunctionDocBuilder.createDocumentation(functionInfo, true);
+		const detail = DocBuilder.createDetail(functionInfo);
+		const documentation = DocBuilder.functionDocumentation(functionInfo, true);
 
 		return new vscode.Hover([detail, documentation], range);
 	}

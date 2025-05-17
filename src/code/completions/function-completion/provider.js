@@ -1,5 +1,5 @@
 import FunctionCompletionItemsBuilder from './items-builder';
-import visitFunctions from '../../visitors/function-visitor';
+import visitFunctions from '../../visitors/function-visitor/visitor';
 
 export default class FunctionCompletionProvider {
 	async provideCompletionItems(document, position) {

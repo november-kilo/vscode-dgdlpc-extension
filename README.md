@@ -65,6 +65,7 @@ An example of `.vscode/launch.json`:
 - `src/code/completions` - Auto-completion providers
 - `src/code/diagnostics` - Diagnostics, such as detecting variable declaration with assignment. There's a lot of other code in here because there were other things I wanted to do but haven't got around to them.
 - `src/code/hover` - Hover handlers
+- `src/code/visitors` - Visitors used by other parts of the extension
 - `src/dgd` - DGD-specific functionality
 - `src/lpc` - LPC language parsing. The code here is experimenting with antlr to learn how to use it to implement more features.
 - `src/lpc/parser` - Generated ANTLR4 parser

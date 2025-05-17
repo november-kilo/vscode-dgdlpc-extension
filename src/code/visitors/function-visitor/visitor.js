@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import FunctionCompletionParameters from '../completions/function-completion/parameters';
-import LPCParserFactory from '../lpc-parser-factory';
-import Logger from '../logger';
+import FunctionCompletionParameters from '../../completions/function-completion/parameters';
+import LPCParserFactory from '../../lpc-parser-factory';
+import Logger from '../../logger';
 
 class FunctionDeclarationVisitor {
 	visit(ctx, functions, documentUri) {

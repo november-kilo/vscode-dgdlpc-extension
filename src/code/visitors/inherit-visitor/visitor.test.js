@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import antlr4 from 'antlr4';
-import LPCLexer from '../../lpc/parser/LPCLexer';
-import LPCParser from '../../lpc/parser/LPCParser';
-import InheritDeclarationVisitor from './inherit-visitor';
+import LPCLexer from '../../../lpc/parser/LPCLexer';
+import LPCParser from '../../../lpc/parser/LPCParser';
+import InheritDeclarationVisitor from './visitor';
 
 describe('InheritDeclarationVisitor', () => {
 	let visitor;

@@ -7,6 +7,10 @@ export default class LPCParserFactory {
 		const inputStream = new antlr4.InputStream(text);
 		const lexer = new LPCLexer(inputStream);
 		const tokens = new antlr4.CommonTokenStream(lexer);
-		return new LPCParser(tokens);
+		const parser = new LPCParser(tokens);
+
+		parser.buildParseTrees = true;
+
+		return parser;
 	}
 }
