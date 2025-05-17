@@ -45,20 +45,6 @@ class WorkspaceEditMock {
 	}
 }
 
-class SemanticTokensLegendClass {
-	constructor(tokenTypes, tokenModifiers) {
-		this.tokenTypes = tokenTypes;
-		this.tokenModifiers = tokenModifiers;
-	}
-}
-
-const SemanticTokensLegendMock = jest.fn().mockImplementation((tokenTypes, tokenModifiers) => {
-	return new SemanticTokensLegendClass(tokenTypes, tokenModifiers);
-});
-
-// Make the prototype chain work correctly for instanceof checks
-Object.setPrototypeOf(SemanticTokensLegendClass.prototype, SemanticTokensLegendMock.prototype);
-
 module.exports = {
 	Range: jest.fn((startLine, startChar, endLine, endChar) => ({
 		start: { line: startLine, character: startChar },
@@ -174,11 +160,6 @@ module.exports = {
 			dispose: jest.fn()
 		}))
 	},
-	SemanticTokensLegend: SemanticTokensLegendMock,
-	SemanticTokensBuilder: jest.fn().mockImplementation(() => ({
-		push: jest.fn(),
-		build: jest.fn().mockReturnValue('built-tokens')
-	})),
 	languages: {
 		createDiagnosticCollection: jest.fn().mockImplementation((name) => ({
 			name,

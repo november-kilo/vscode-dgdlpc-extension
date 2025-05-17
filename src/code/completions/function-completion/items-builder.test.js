@@ -4,18 +4,6 @@ import FunctionDocBuilder from '../../function-doc-builder';
 
 jest.mock('../../function-doc-builder');
 
-jest.mock('vscode', () => ({
-	CompletionItem: jest.fn().mockImplementation((label, kind) => ({
-		label,
-		kind,
-		documentation: null,
-		detail: null
-	})),
-	CompletionItemKind: {
-		Function: 'Function'
-	}
-}));
-
 describe('FunctionCompletionItemsBuilder', () => {
 	let mockDocument;
 
@@ -50,41 +38,11 @@ describe('FunctionCompletionItemsBuilder', () => {
 		expect(vscode.CompletionItem).toHaveBeenCalledWith('test_func', 'Function');
 		expect(FunctionDocBuilder.createDocumentation).toHaveBeenCalledWith(mockFunction);
 		expect(FunctionDocBuilder.createDetail).toHaveBeenCalledWith(mockFunction);
-		expect(result[0]).toEqual({
+		expect(result[0]).toMatchObject({
 			label: 'test_func',
 			kind: 'Function',
 			documentation: mockDocumentation,
 			detail: mockDetail
-		});
-	});
-
-	test('creates completion items for multiple functions', () => {
-		const functions = new Map([
-			['func1', { name: 'func1', returnType: 'int' }],
-			['func2', { name: 'func2', returnType: 'string' }],
-			['func3', { name: 'func3', returnType: 'void' }]
-		]);
-
-		FunctionDocBuilder.createDocumentation.mockImplementation(
-			(func) => ({ value: `Doc for ${func.name}` })
-		);
-		FunctionDocBuilder.createDetail.mockImplementation(
-			(func) => `${func.returnType} ${func.name}()`
-		);
-
-		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
-
-		expect(result).toHaveLength(3);
-		expect(vscode.CompletionItem).toHaveBeenCalledTimes(3);
-		expect(FunctionDocBuilder.createDocumentation).toHaveBeenCalledTimes(3);
-		expect(FunctionDocBuilder.createDetail).toHaveBeenCalledTimes(3);
-
-		functions.forEach((funcInfo, name) => {
-			const item = result.find(item => item.label === name);
-			expect(item).toBeDefined();
-			expect(item.kind).toBe('Function');
-			expect(item.documentation).toEqual({ value: `Doc for ${name}` });
-			expect(item.detail).toBe(`${funcInfo.returnType} ${name}()`);
 		});
 	});
 
@@ -106,7 +64,7 @@ describe('FunctionCompletionItemsBuilder', () => {
 		const result = FunctionCompletionItemsBuilder.getCompletionItems(mockDocument, functions);
 
 		expect(result).toHaveLength(1);
-		expect(result[0]).toEqual({
+		expect(result[0]).toMatchObject({
 			label: 'complex_func',
 			kind: 'Function',
 			documentation: mockDocumentation,

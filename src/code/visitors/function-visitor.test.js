@@ -1,4 +1,5 @@
-import visitFunctions, {FunctionDeclarationVisitor} from './function-visitor';
+import visitFunctions from './function-visitor';
+import Logger from '../logger';
 
 describe('visitFunctions', () => {
 	function createMockDocument(content) {
@@ -156,6 +157,7 @@ describe('visitFunctions', () => {
             }
         `;
 		const functions = visitFunctions(createMockDocument(input));
+
 		expect(functions.size).toBe(0);
 	});
 
@@ -166,6 +168,7 @@ describe('visitFunctions', () => {
             }
         `;
 		const functions = visitFunctions(createMockDocument(input));
+
 		expect(functions.size).toBe(0);
 	});
 
@@ -177,6 +180,7 @@ describe('visitFunctions', () => {
             void test_func() {}
         `;
 		const functions = visitFunctions(createMockDocument(input));
+
 		expect(functions.size).toBe(1);
 		expect(functions.has('test_func')).toBe(true);
 	});
@@ -188,6 +192,61 @@ describe('visitFunctions', () => {
             }
         `;
 		const functions = visitFunctions(createMockDocument(input));
+
 		expect(functions.size).toBe(0);
+	});
+
+	test('handles multiple function declarations with different types and modifiers', () => {
+		const input = `
+        static int func1();
+        private string func2(int x) {
+            return "test";
+        }
+        nomask void func3(object obj, string str) {}
+    `;
+		const functions = visitFunctions(createMockDocument(input));
+
+		expect(functions.size).toBe(3);
+		expect(functions.get('func1')).toBeDefined();
+		expect(functions.get('func2')).toBeDefined();
+		expect(functions.get('func3')).toBeDefined();
+	});
+
+	test('handles operator overloading declarations', () => {
+		const input = `
+        mixed operator+(int x) {
+            return x;
+        }
+        int operator[](int idx) {
+            return idx;
+        }
+        int operator+=(int x) {
+        	return x;
+        }
+    `;
+		const functions = visitFunctions(createMockDocument(input));
+
+		expect(functions.size).toBe(3);
+	});
+
+	test('handles mixed function declarations and other program elements', () => {
+		const input = `
+        int global;
+        #define TEST 1
+        void func1();
+        inherit "/std/object";
+        string func2() {
+            return "test";
+        }
+    `;
+		const functions = visitFunctions(createMockDocument(input));
+
+		expect(functions.size).toBe(2);
+		expect(functions.get('func1')).toBeDefined();
+		expect(functions.get('func2')).toBeDefined();
+		const func1 = functions.get('func1');
+		const func2 = functions.get('func2');
+		expect(func1.parameters).toEqual([]);
+		expect(func2.parameters).toEqual([]);
 	});
 });

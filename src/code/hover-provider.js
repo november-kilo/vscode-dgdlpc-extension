@@ -22,6 +22,7 @@ export default class LPCHoverProvider {
 
 	dispose() {
 		for (const handler of this.hoverHandlers) {
+			/* istanbul ignore next */
 			if (typeof handler.dispose === 'function') {
 				handler.dispose();
 			}

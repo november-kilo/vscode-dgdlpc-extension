@@ -109,6 +109,17 @@ describe('FunctionDocBuilder', () => {
 			expect(documentation.appendMarkdown).toHaveBeenNthCalledWith(2, 'Defined on [line 10](def-link)');
 		});
 
+		it('should handle missing locations using default parameter', () => {
+			const functionInfo = {
+				forwardDeclarationLocation: null,
+				definitionLocation: null
+			};
+
+			const documentation = FunctionDocBuilder.createDocumentation(functionInfo);
+
+			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
+		});
+
 		it('should handle missing locations', () => {
 			const functionInfo = {
 				forwardDeclarationLocation: null,
