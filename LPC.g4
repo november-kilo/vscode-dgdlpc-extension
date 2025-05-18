@@ -95,7 +95,7 @@ variableDeclarators
     ;
 
 typeSpecifier
-    : (VOID | INT | FLOAT | STRING | OBJECT | MAPPING | MIXED) arraySpecifier?
+    : (VOID | INT | FLOAT | STRING | OBJECT | MAPPING | MIXED | IDENTIFIER) arraySpecifier?
     ;
 
 arraySpecifier

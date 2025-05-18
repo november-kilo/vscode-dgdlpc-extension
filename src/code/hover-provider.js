@@ -1,12 +1,10 @@
 import KfunsHoverHandler from './hover/hover-handler-kfuns';
 import FunctionsHoverHandler from './hover/hover-handler-functions';
-import VariablesHoverHandler from './hover/hover-handler-variables';
 
 export default class LPCHoverProvider {
 	constructor(hoverHandlers = [
 		new KfunsHoverHandler(),
-		new FunctionsHoverHandler(),
-		new VariablesHoverHandler()
+		new FunctionsHoverHandler()
 	]) {
 		this.hoverHandlers = hoverHandlers;
 	}

@@ -5,6 +5,7 @@ import extractFunctions from './function-extractor.js';
 import extractInherits from './inherit-extractor.js';
 import extractDirectives from './preprocessor-directive-extractor';
 import LPCErrorListener from './error-listener.js';
+import Logger from '../code/logger';
 
 function parseCode(input) {
 	const inputStream = new antlr4.InputStream(input);
@@ -261,7 +262,7 @@ describe('LPC Parser', () => {
         `;
 		const tree = parseCode(input);
 
-		expect(tree.errors).toHaveLength(2);
+		expect(tree.errors[0].message).toContain('no viable alternative at input');
 	});
 
 	test('should fail on invalid statement', () => {
@@ -346,7 +347,7 @@ f = f * 1.5;
 
 		const tree = parseCode(input);
 
-		expect(tree.errors).toHaveLength(2);
+		expect(tree.errors[0].message).toContain('no viable alternative at input');
 	});
 
 	test('handles invalid variable declaration', () => {

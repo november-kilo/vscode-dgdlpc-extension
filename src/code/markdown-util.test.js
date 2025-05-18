@@ -10,6 +10,15 @@ describe('MarkdownUtil', () => {
 			const result = MarkdownUtil.link('Click here', document, 42);
 			expect(result).toBe('[Click here](file:///path/to/file.js#42)');
 		});
+		describe('link with column', () => {
+			test('creates markdown link with correct file path and line and column', () => {
+				const document = {
+					uri: { fsPath: '/path/to/file.js' }
+				};
+				const result = MarkdownUtil.link('Click here', document, 42, 12);
+				expect(result).toBe('[Click here](file:///path/to/file.js#42,12)');
+			});
+		});
 	});
 
 	describe('lineLink', () => {
@@ -17,7 +26,7 @@ describe('MarkdownUtil', () => {
 			const document = {
 				uri: { fsPath: '/path/to/file.js' }
 			};
-			const result = MarkdownUtil.lineLink(42, document);
+			const result = MarkdownUtil.lineLink(document, 42);
 			expect(result).toBe('[line 42](file:///path/to/file.js#42)');
 		});
 	});
