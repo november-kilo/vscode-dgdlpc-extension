@@ -1,5 +1,5 @@
-export default class LPCDeclarationParser {
-	static REGEX = /(?:((?:private|static|nomask|atomic)(?:\s+(?:private|static|nomask|atomic))*)\s+)?(int|string|float|object|mapping|mixed|void)\s*(\**)(\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*((?:\(\s*\{[\s\S]*?\}\s*\)|[^;]+));/gm;
+export default class VariableDeclarationParser {
+	static REGEX_PATTERN = /(?:((?:private|static|nomask|atomic)(?:\s+(?:private|static))*)\s+)?(int|string|float|object|mapping|mixed)\s*(\**)(\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*((?:\(\s*\{[\s\S]*?\}\s*\)|[^;]+));/gm;
 
 	static shouldNotCreateDiagnostic(fullMatch, varType, varName) {
 		const str = `${varType}${varName}`;
@@ -9,15 +9,11 @@ export default class LPCDeclarationParser {
 
 	static parseDeclaration(text) {
 		const matches = [];
-		let match;
 
-		// Reset lastIndex
-		this.REGEX.lastIndex = 0;
-
-		while ((match = this.REGEX.exec(text)) !== null) {
+		for (const match of text.matchAll(this.REGEX_PATTERN)) {
 			const [fullMatch, modifiers, varType, pointers, spacing, varName, varValue] = match;
 
-			if (LPCDeclarationParser.shouldNotCreateDiagnostic(fullMatch, varType, varName)) {
+			if (this.shouldNotCreateDiagnostic(fullMatch, varType, varName)) {
 				continue;
 			}
 

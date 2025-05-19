@@ -1,4 +1,4 @@
-import InvalidVariableDeclarationFix from './invalid-variable-declaration-fix';
+import InvalidVariableDeclarationFix from './invalid-declaration-fix';
 
 describe('InvalidVariableDeclarationFix', () => {
 	let document;
@@ -10,6 +10,14 @@ describe('InvalidVariableDeclarationFix', () => {
 			uri: { path: '/test/file.c' },
 			lineAt: jest.fn().mockReturnValue({ text: '    ' })
 		};
+	});
+
+	describe('isInPlace', () => {
+		test('returns true', () => {
+			fix = new InvalidVariableDeclarationFix(document, {});
+
+			expect(fix.isInPlaceFix()).toBe(true);
+		});
 	});
 
 	describe('getTitle', () => {

@@ -1,7 +1,7 @@
 import CodeFixFactory from './actions/code-fix-factory';
 
 export default class LPCCodeActionProvider {
-	provideCodeActions(document, range, context, token) {
+	provideCodeActions(document, range, context) {
 		if (!context.diagnostics.length) {
 			return [];
 		}

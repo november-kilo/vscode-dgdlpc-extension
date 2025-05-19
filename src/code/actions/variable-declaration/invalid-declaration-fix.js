@@ -1,8 +1,12 @@
-import CodeFix from './code-fix';
+import CodeFix from '../code-fix';
 
 export default class InvalidVariableDeclarationFix extends CodeFix {
 	getTitle() {
 		return 'Split variable declaration and initialization';
+	}
+
+	isInPlaceFix() {
+		return true;
 	}
 
 	getFormattedCode() {

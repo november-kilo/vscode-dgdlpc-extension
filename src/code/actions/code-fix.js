@@ -12,14 +12,27 @@ export default class CodeFix {
 			vscode.CodeActionKind.QuickFix
 		);
 
-		const formattedCode = this.getFormattedCode();
+		if (this.isInPlaceFix()) {
+			const formattedCode = this.getFormattedCode();
+			fix.edit = new vscode.WorkspaceEdit();
+			fix.edit.replace(this.document.uri, this.diagnostic.range, formattedCode);
+		} else {
+			fix.edit = this.createWorkspaceEdit();
+		}
 
-		fix.edit = new vscode.WorkspaceEdit();
-		fix.edit.replace(this.document.uri, this.diagnostic.range, formattedCode);
 		fix.isPreferred = true;
 		fix.diagnostics = [this.diagnostic];
 
 		return fix;
+	}
+
+	isInPlaceFix() {
+		return true;
+	}
+
+	// New method for complex edit operations
+	createWorkspaceEdit() {
+		throw new Error('createWorkspaceEdit must be implemented by non-in-place fixes');
 	}
 
 	getTitle() {

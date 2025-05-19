@@ -5,20 +5,26 @@ export default class LPCDiagnostic {
 		this.severity = severity;
 	}
 
-	createDiagnostic(range, message, code, data) {
+	createDiagnostic(range, message, code, data = null) {
+		if (!range || !message || !code) {
+			throw new TypeError('range, message, and code are required parameters');
+		}
+
 		const diagnostic = new vscode.Diagnostic(
 			range,
 			message,
 			this.severity
 		);
+
 		diagnostic.code = code;
-		if (data) {
+		if (data !== null) {
 			diagnostic.data = data;
 		}
+
 		return diagnostic;
 	}
 
 	analyze(document) {
-		throw new Error('analyze method must be implemented by subclasses');
+		throw new Error('analyze must be implemented by subclass');
 	}
 }

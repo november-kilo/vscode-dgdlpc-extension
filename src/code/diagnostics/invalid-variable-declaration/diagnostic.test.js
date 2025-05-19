@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import InvalidVariableDeclarationDiagnostic from './invalid-variable-declaration-diagnostic';
-import LPCDeclarationParser from './lpc-declaration-parser';
+import InvalidVariableDeclarationDiagnostic from './diagnostic';
+import VariableDeclarationParser from './parser';
 
-describe('InvalidVariableDeclarationDiagnostic', () => {
+describe('Diagnostic', () => {
 	let diagnosticAnalyzer;
 	let mockDocument;
 
@@ -29,7 +29,7 @@ describe('InvalidVariableDeclarationDiagnostic', () => {
 				data: { varType: 'int', varName: 'x' }
 			}];
 
-			jest.spyOn(LPCDeclarationParser, 'parseDeclaration')
+			jest.spyOn(VariableDeclarationParser, 'parseDeclaration')
 				.mockReturnValue(declarations);
 
 			const [diagnostic] = diagnosticAnalyzer.analyze(mockDocument);
@@ -57,7 +57,7 @@ describe('InvalidVariableDeclarationDiagnostic', () => {
         object my_object = find_object(BAZ);
     `;
 
-			const matches = LPCDeclarationParser.parseDeclaration(input);
+			const matches = VariableDeclarationParser.parseDeclaration(input);
 
 			expect(matches).toHaveLength(1);
 			expect(matches[0].data).toEqual({
@@ -87,7 +87,7 @@ describe('InvalidVariableDeclarationDiagnostic', () => {
 				}
 			];
 
-			jest.spyOn(LPCDeclarationParser, 'parseDeclaration')
+			jest.spyOn(VariableDeclarationParser, 'parseDeclaration')
 				.mockReturnValue(declarations);
 
 			const diagnostics = diagnosticAnalyzer.analyze(mockDocument);
@@ -135,7 +135,7 @@ describe('InvalidVariableDeclarationDiagnostic', () => {
 				data: { varType: 'int', varName: 'x' }
 			}];
 
-			jest.spyOn(LPCDeclarationParser, 'parseDeclaration')
+			jest.spyOn(VariableDeclarationParser, 'parseDeclaration')
 				.mockReturnValue(declarations);
 
 			const [diagnostic] = diagnosticAnalyzer.analyze(mockDocument);
@@ -165,7 +165,7 @@ describe('InvalidVariableDeclarationDiagnostic', () => {
 				data: { varType: 'int', varName: 'x' }
 			}];
 
-			jest.spyOn(LPCDeclarationParser, 'parseDeclaration')
+			jest.spyOn(VariableDeclarationParser, 'parseDeclaration')
 				.mockReturnValue(declarations);
 
 			diagnosticAnalyzer.severity = vscode.DiagnosticSeverity.Error;

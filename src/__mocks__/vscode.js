@@ -38,6 +38,8 @@ const HoverMock = jest.fn().mockImplementation((contents, range) => ({
 class WorkspaceEditMock {
 	constructor() {
 		this.replacements = [];
+		this.delete = jest.fn();
+		this.insert = jest.fn();
 	}
 
 	replace(uri, range, newText) {

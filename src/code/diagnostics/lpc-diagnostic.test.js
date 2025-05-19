@@ -1,6 +1,12 @@
 import * as vscode from 'vscode';
 import LPCDiagnostic from './lpc-diagnostic';
 
+class TestDiagnostic extends LPCDiagnostic {
+	analyze(document) {
+		return [];
+	}
+}
+
 describe('LPCDiagnostic', () => {
 	let diagnostic;
 
@@ -21,16 +27,40 @@ describe('LPCDiagnostic', () => {
 
 	describe('createDiagnostic', () => {
 		let mockRange;
+		let testMessage;
+		let testCode;
 
 		beforeEach(() => {
 			mockRange = new vscode.Range(0, 0, 0, 1);
+			testMessage = 'Test message';
+			testCode = 'test-code';
+		});
+
+		describe('invalid createDiagnostic parameters', () => {
+			test('should throw error when range is not provided', () => {
+				expect(() => {
+					diagnostic.createDiagnostic(null, testMessage, testCode);
+				}).toThrow(new TypeError('range, message, and code are required parameters'));
+			});
+
+			test('should throw error when message is not provided', () => {
+				expect(() => {
+					diagnostic.createDiagnostic(mockRange, null, testCode);
+				}).toThrow(new TypeError('range, message, and code are required parameters'));
+			});
+
+			test('should throw error when code is not provided', () => {
+				expect(() => {
+					diagnostic.createDiagnostic(mockRange, testMessage, null);
+				}).toThrow(new TypeError('range, message, and code are required parameters'));
+			});
 		});
 
 		test('should create diagnostic with required properties', () => {
 			const result = diagnostic.createDiagnostic(
 				mockRange,
-				'Test message',
-				'test-code'
+				testMessage,
+				testCode
 			);
 
 			expect(result).toBeInstanceOf(vscode.Diagnostic);
@@ -44,8 +74,8 @@ describe('LPCDiagnostic', () => {
 			const testData = { key: 'value' };
 			const result = diagnostic.createDiagnostic(
 				mockRange,
-				'Test message',
-				'test-code',
+				testMessage,
+				testCode,
 				testData
 			);
 
@@ -78,17 +108,12 @@ describe('LPCDiagnostic', () => {
 		test('should throw error when not implemented', () => {
 			expect(() => {
 				diagnostic.analyze({});
-			}).toThrow('analyze method must be implemented by subclasses');
+			}).toThrow('analyze must be implemented by subclass');
 		});
 
 		test('should allow implementation in subclass', () => {
-			class TestDiagnostic extends LPCDiagnostic {
-				analyze(document) {
-					return [];
-				}
-			}
-
 			const testDiagnostic = new TestDiagnostic();
+
 			expect(() => {
 				testDiagnostic.analyze({});
 			}).not.toThrow();

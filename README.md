@@ -63,7 +63,7 @@ An example of `.vscode/launch.json`:
 - `src/code` - VSCode extension functionality
 - `src/code/actions` - Actions, such as 'Quick Fix'
 - `src/code/completions` - Auto-completion providers
-- `src/code/diagnostics` - Diagnostics, such as detecting variable declaration with assignment. There's a lot of other code in here because there were other things I wanted to do but haven't got around to them.
+- `src/code/diagnostics` - Diagnostics, such as variable declaration with assignment.
 - `src/code/hover` - Hover handlers
 - `src/code/visitors` - Visitors used by other parts of the extension
 - `src/dgd` - DGD-specific functionality

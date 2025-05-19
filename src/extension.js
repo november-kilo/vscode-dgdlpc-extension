@@ -2,12 +2,13 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import LPCCodeActionProvider from './code/action-provider';
 import LPCCompletionProvider from './code/completion-provider';
-import InvalidVariableDeclarationDiagnostic from './code/diagnostics/invalid-variable-declaration-diagnostic';
+import InvalidVariableDeclarationDiagnostic from './code/diagnostics/invalid-variable-declaration/diagnostic';
 import LPCDiagnosticProvider from './code/diagnostic-provider';
 import LPCHoverProvider from './code/hover-provider';
 import DGDConfigManager from './dgd/config-manager';
 import DGDIntegration from './dgd/integration';
 import FunctionCompletionProvider from './code/completions/function-completion/provider';
+import InvalidInheritDeclarationDiagnostic from './code/diagnostics/invalid-inherit-declaration/diagnostic';
 
 function registerDGDCommands(context, dgd) {
 	context.subscriptions.push(
@@ -67,7 +68,8 @@ function registerConfigCommand(context, dgdConfig) {
 
 function setupLanguageProviders(context) {
 	const lpcDiagnosticProvider = new LPCDiagnosticProvider([
-		new InvalidVariableDeclarationDiagnostic()
+		new InvalidVariableDeclarationDiagnostic(),
+		new InvalidInheritDeclarationDiagnostic()
 	]);
 
 	const lpcCodeActionProvider = new LPCCodeActionProvider();

@@ -57,7 +57,7 @@ describe('DocBuilder', () => {
 				location: null,
 				label: 'Test',
 				addNewline: false
-			}, false);
+			});
 
 			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
 		});
@@ -80,7 +80,7 @@ describe('DocBuilder', () => {
 				location,
 				label: 'Test',
 				addNewline: true
-			}, false);
+			});
 
 			expect(documentation.appendMarkdown).toHaveBeenCalledWith('Test on [line 10](link)\n');
 			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(10, document);
@@ -129,22 +129,6 @@ describe('DocBuilder', () => {
 			const documentation = DocBuilder.functionDocumentation(functionInfo, false);
 
 			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
-		});
-
-		it('should use location instead of document when fromLocation is true', () => {
-			const functionInfo = {
-				forwardDeclarationLocation: {
-					range: { start: { line: 4 } }
-				},
-				definitionLocation: {
-					range: { start: { line: 9 } }
-				}
-			};
-
-			const documentation = DocBuilder.functionDocumentation(functionInfo, true);
-
-			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(5, functionInfo.forwardDeclarationLocation);
-			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(10, functionInfo.definitionLocation);
 		});
 	});
 

@@ -22,7 +22,7 @@ export default class DocBuilder {
 		return documentation;
 	}
 
-	static functionDocumentation(functionInfo, fromLocation = false) {
+	static functionDocumentation(functionInfo) {
 		const documentation = this.initializeMarkdownString();
 
 		const locations = [
@@ -31,7 +31,7 @@ export default class DocBuilder {
 		];
 
 		locations.forEach(config =>
-			DocBuilder.appendLocation(documentation, config, fromLocation)
+			DocBuilder.appendLocation(documentation, config)
 		);
 
 		return documentation;
@@ -45,7 +45,7 @@ export default class DocBuilder {
 		return documentation;
 	}
 
-	static appendLocation(documentation, { document, location, label, addNewline = false }, fromLocation) {
+	static appendLocation(documentation, { document, location, label, addNewline = false }) {
 		if (!location) {
 			return;
 		}
