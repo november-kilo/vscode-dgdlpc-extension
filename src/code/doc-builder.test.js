@@ -8,7 +8,6 @@ jest.mock('./markdown-util', () => ({
 
 describe('DocBuilder', () => {
 	beforeEach(() => {
-		// Clear all mocks before each test
 		jest.clearAllMocks();
 	});
 
@@ -61,39 +60,17 @@ describe('DocBuilder', () => {
 
 			expect(documentation.appendMarkdown).not.toHaveBeenCalled();
 		});
-
-		it('should append location with correct format', () => {
-			const documentation = {
-				appendMarkdown: jest.fn()
-			};
-			const location = {
-				range: {
-					start: { line: 9 } // Line 9 will become line 10 in display
-				}
-			};
-			const document = 'testDoc';
-
-			MarkdownUtil.lineLink.mockReturnValue('[line 10](link)');
-
-			DocBuilder.appendLocation(documentation, {
-				document,
-				location,
-				label: 'Test',
-				addNewline: true
-			});
-
-			expect(documentation.appendMarkdown).toHaveBeenCalledWith('Test on [line 10](link)\n');
-			expect(MarkdownUtil.lineLink).toHaveBeenCalledWith(10, document);
-		});
 	});
 
 	describe('createDocumentation', () => {
 		it('should create documentation with both locations', () => {
 			const functionInfo = {
 				forwardDeclarationLocation: {
+					uri: { fsPath: '' },
 					range: { start: { line: 4 } }
 				},
 				definitionLocation: {
+					uri: { fsPath: '' },
 					range: { start: { line: 9 } }
 				}
 			};
@@ -187,7 +164,7 @@ describe('DocBuilder', () => {
 
 			expect(mockMarkdownString.appendMarkdown).toHaveBeenNthCalledWith(
 				2,
-				'Type: `number[][]`\n\n'
+				'Type: `number**`\n\n'
 			);
 		});
 

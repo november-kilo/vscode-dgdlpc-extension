@@ -1,4 +1,4 @@
-import KFunCompletionProvider from './provider';
+import KFunCompletionProvider from './kfun-completion-provider';
 import KFunDocBuilder from '../../kfun-doc-builder';
 
 jest.mock('../../kfun-doc-builder');

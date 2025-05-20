@@ -1,8 +1,8 @@
-import KFunCompletionProvider from './completions/kfun-completion/provider';
-import KeywordCompletionProvider from './completions/word-completion/keyword-completion-provider';
-import TypeCompletionProvider from './completions/word-completion/type-completion-provider';
+import KFunCompletionProvider from './completions/builtin-completion/kfun-completion-provider';
+import KeywordCompletionProvider from './completions/builtin-completion/keyword-completion-provider';
+import TypeCompletionProvider from './completions/builtin-completion/type-completion-provider';
 
-export default class LPCCompletionProvider {
+export default class BuiltinCompletionProvider {
 	constructor() {
 		this.kfunProvider = new KFunCompletionProvider();
 		this.keywordProvider = new KeywordCompletionProvider();

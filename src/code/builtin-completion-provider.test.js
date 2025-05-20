@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import LPCCompletionProvider from './completion-provider';
-import KFunCompletionProvider from './completions/kfun-completion/provider';
-import KeywordCompletionProvider from './completions/word-completion/keyword-completion-provider';
-import TypeCompletionProvider from './completions/word-completion/type-completion-provider';
+import BuiltinCompletionProvider from './builtin-completion-provider';
+import KFunCompletionProvider from './completions/builtin-completion/kfun-completion-provider';
+import KeywordCompletionProvider from './completions/builtin-completion/keyword-completion-provider';
+import TypeCompletionProvider from './completions/builtin-completion/type-completion-provider';
 
-jest.mock('./completions/kfun-completion/provider');
-jest.mock('./completions/word-completion/keyword-completion-provider');
-jest.mock('./completions/word-completion/type-completion-provider');
+jest.mock('./completions/builtin-completion/kfun-completion-provider');
+jest.mock('./completions/builtin-completion/keyword-completion-provider');
+jest.mock('./completions/builtin-completion/type-completion-provider');
 jest.mock('../kfuns.json', () => ({}), { virtual: true });
 
 describe('LPCCompletionProvider', () => {
@@ -48,7 +48,7 @@ describe('LPCCompletionProvider', () => {
 		KeywordCompletionProvider.mockImplementation(() => mockKeywordProvider);
 		TypeCompletionProvider.mockImplementation(() => mockTypeProvider);
 
-		provider = new LPCCompletionProvider();
+		provider = new BuiltinCompletionProvider();
 		mockDocument = { uri: vscode.Uri.file('/test/file.c') };
 		mockPosition = vscode.Position(0, 0);
 	});

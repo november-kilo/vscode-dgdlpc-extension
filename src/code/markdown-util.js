@@ -1,15 +1,16 @@
 import * as vscode from 'vscode';
 
 export default class MarkdownUtil {
-	static link(text, document, line, column = 0) {
+	static link(text, path, line, column = 0) {
+		console.log('PATH', JSON.stringify(path, null, 2));
 		if (column === 0) {
-			return `[${text}](${encodeURI('file://' + document.uri.fsPath)}#${line})`;
+			return `[${text}](${encodeURI(path)}#${line})`;
 		}
-		return `[${text}](${encodeURI('file://' + document.uri.fsPath)}#${line},${column})`;
+		return `[${text}](${encodeURI(path)}#${line},${column})`;
 	}
 
-	static lineLink(document, lineNumber, columnNumber = 0) {
-		return MarkdownUtil.link(`line ${lineNumber}`, document, lineNumber, columnNumber);
+	static lineLink(path, lineNumber, columnNumber = 0) {
+		return MarkdownUtil.link(`line ${lineNumber}`, path, lineNumber, columnNumber);
 	}
 
 	static bold(text, isSection = false) {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import LPCCodeActionProvider from './code/action-provider';
-import LPCCompletionProvider from './code/completion-provider';
+import BuiltinCompletionProvider from './code/builtin-completion-provider';
 import InvalidVariableDeclarationDiagnostic from './code/diagnostics/invalid-variable-declaration/diagnostic';
 import LPCDiagnosticProvider from './code/diagnostic-provider';
 import LPCHoverProvider from './code/hover-provider';
@@ -9,6 +9,7 @@ import DGDConfigManager from './dgd/config-manager';
 import DGDIntegration from './dgd/integration';
 import FunctionCompletionProvider from './code/completions/function-completion/provider';
 import InvalidInheritDeclarationDiagnostic from './code/diagnostics/invalid-inherit-declaration/diagnostic';
+import InheritLabelsProvider from './code/completions/inherit-label-completion/provider';
 
 function registerDGDCommands(context, dgd) {
 	context.subscriptions.push(
@@ -73,8 +74,9 @@ function setupLanguageProviders(context) {
 	]);
 
 	const lpcCodeActionProvider = new LPCCodeActionProvider();
-	const lpcCompletionProvider = new LPCCompletionProvider();
-	const lpcFunctionCompletionProvider = new FunctionCompletionProvider();
+	const builtinCompletionProvider = new BuiltinCompletionProvider();
+	const functionCompletionProvider = new FunctionCompletionProvider();
+	const inheritLabelsProvider = new InheritLabelsProvider();
 	const lpcHoverProvider = new LPCHoverProvider();
 
 	const lpcLanguageIdentifier = {
@@ -92,7 +94,7 @@ function setupLanguageProviders(context) {
 		),
 		vscode.languages.registerCompletionItemProvider(
 			lpcLanguageIdentifier,
-			lpcCompletionProvider
+			builtinCompletionProvider
 		),
 		vscode.languages.registerHoverProvider(
 			lpcLanguageIdentifier,
@@ -100,7 +102,11 @@ function setupLanguageProviders(context) {
 		),
 		vscode.languages.registerCompletionItemProvider(
 			lpcLanguageIdentifier,
-			lpcFunctionCompletionProvider
+			functionCompletionProvider
+		),
+		vscode.languages.registerCompletionItemProvider(
+			lpcLanguageIdentifier,
+			inheritLabelsProvider
 		)
 	];
 

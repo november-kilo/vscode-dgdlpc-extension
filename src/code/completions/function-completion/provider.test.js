@@ -14,11 +14,7 @@ describe('FunctionCompletionProvider', () => {
 
 	beforeEach(() => {
 		provider = new FunctionCompletionProvider();
-
-		// Reset mocks
 		jest.clearAllMocks();
-
-		// Setup common mock values
 		mockPosition = { character: 5, line: 0 };
 		mockToken = {};
 		mockContext = {};

@@ -65,7 +65,7 @@ class InheritVisitor {
 	}
 }
 
-function visitInherit(document) {
+function 	visitInherit(document) {
 	const parser = LPCParserFactory.createParser(document.getText());
 	const tree = parser.program();
 	const visitor = new InheritVisitor();

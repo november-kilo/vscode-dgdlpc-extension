@@ -11,7 +11,7 @@ export default class DocBuilder {
 		const documentation = this.initializeMarkdownString();
 
 		documentation.appendMarkdown(`**${scope}**: \`${name}\`\n\n`);
-		documentation.appendMarkdown(`Type: \`${varInfo.type}${varInfo.arrayDimension ? '[]'.repeat(varInfo.arrayDimension) : ''}\`\n\n`);
+		documentation.appendMarkdown(`Type: \`${varInfo.type}${varInfo.arrayDimension ? '*'.repeat(varInfo.arrayDimension) : ''}\`\n\n`);
 
 		if (varInfo.modifiers) {
 			documentation.appendMarkdown(`Modifiers: \`${varInfo.modifiers}\`\n\n`);
@@ -30,8 +30,8 @@ export default class DocBuilder {
 			{ location: functionInfo.definitionLocation, label: 'Defined' }
 		];
 
-		locations.forEach(config =>
-			DocBuilder.appendLocation(documentation, config)
+		locations.forEach((location) =>
+			DocBuilder.appendLocation(documentation, location)
 		);
 
 		return documentation;
@@ -50,8 +50,17 @@ export default class DocBuilder {
 			return;
 		}
 
-		const line = location.range.start.line + 1;
-		const lineLink = MarkdownUtil.lineLink(line, document === undefined ? location : document);
-		documentation.appendMarkdown(`${label} on ${lineLink}${addNewline ? '\n' : ''}`);
+		const buildFilePath = (document, location) => {
+			const basePath = 'file://';
+			const fsPath = (document?.uri || location.uri).fsPath;
+			return `${basePath}${fsPath}`;
+		};
+
+		const path = buildFilePath(document, location);
+		const lineNumber = location.range.start.line + 1;
+		const lineLink = MarkdownUtil.lineLink(path, lineNumber);
+		const markdownText = `${label} on ${lineLink}${addNewline ? '\n' : ''}`;
+
+		documentation.appendMarkdown(markdownText);
 	}
 }
